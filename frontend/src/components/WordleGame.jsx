@@ -96,10 +96,10 @@ const WordleGame = () => {
   };
 
   return (
-    <div className="flex flex-col items-center gap-12 w-full max-w-md mx-auto">
-      <div className="grid grid-rows-6 gap-2">
+    <div className="flex flex-col items-center gap-6 sm:gap-12 w-full max-w-md mx-auto">
+      <div className="grid grid-rows-6 gap-1.5 sm:gap-2">
         {rows.map((guess, i) => (
-          <div key={i} className="grid grid-cols-5 gap-2">
+          <div key={i} className="grid grid-cols-5 gap-1.5 sm:gap-2">
             {guess.split('').map((char, j) => {
               const statusClass = getCellClass(char, j, i);
               const isFilled = char !== ' ' && i === gameState.guesses.length;
@@ -182,13 +182,13 @@ const WordleGame = () => {
       </div>
 
       {/* Modern Virtual Keyboard */}
-      <div className="flex flex-col gap-2 w-full mt-4 select-none">
+      <div className="flex flex-col gap-1.5 sm:gap-2 w-full mt-2 sm:mt-4 select-none px-1">
         {[
           ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
           ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
           ['ENTER', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', 'DEL']
         ].map((row, i) => (
-          <div key={i} className="flex justify-center gap-1.5 w-full">
+          <div key={i} className="flex justify-center gap-1 sm:gap-1.5 w-full">
             {row.map(key => {
               const isWide = key === 'ENTER' || key === 'DEL';
               
@@ -210,7 +210,7 @@ const WordleGame = () => {
                 <button 
                   key={key} 
                   onClick={() => onKeyPress(key === 'DEL' ? 'BACKSPACE' : key)} 
-                  className={`key ${isWide ? 'large text-[10px]' : ''} ${keyStatus} hover:shadow-glow`}
+                  className={`key ${isWide ? 'large flex-1 sm:flex-none text-[9px] sm:text-[10px]' : 'flex-1 sm:flex-none'} ${keyStatus} hover:shadow-glow`}
                 >
                   {key}
                 </button>

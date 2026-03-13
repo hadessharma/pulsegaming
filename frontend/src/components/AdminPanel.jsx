@@ -125,8 +125,8 @@ const AdminPanel = () => {
           )}
         </div>
         
-        <div className="flex flex-col md:flex-row gap-4">
-          <form onSubmit={handleSetGame} className="flex-1 flex gap-2">
+        <div className="flex flex-col gap-4">
+          <form onSubmit={handleSetGame} className="flex flex-col sm:flex-row gap-2">
             <input
               type="text"
               maxLength={5}
@@ -135,7 +135,7 @@ const AdminPanel = () => {
               value={newWord}
               onChange={(e) => setNewWord(e.target.value.replace(/[^a-zA-Z]/g, ''))}
             />
-            <button className="premium-gradient px-6 rounded-xl font-bold flex items-center gap-2 hover:shadow-glow transition-all active:scale-[0.98]">
+            <button className="premium-gradient py-4 sm:py-0 px-6 rounded-xl font-bold flex items-center justify-center gap-2 hover:shadow-glow transition-all active:scale-[0.98]">
               <PlayCircle className="w-5 h-5" />
               LAUNCH
             </button>
@@ -157,19 +157,19 @@ const AdminPanel = () => {
           <UserPlus className="w-5 h-5 text-accent" />
           <h3 className="font-bold text-lg uppercase tracking-tight text-white">Competitor Whitelist</h3>
         </div>
-        <form onSubmit={handleAdd} className="flex gap-4">
+        <form onSubmit={handleAdd} className="flex flex-col sm:flex-row gap-4">
           <div className="relative flex-1">
             <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
             <input
               type="email"
               placeholder="Competitor's Email"
-              className="w-full pl-12 pr-4 py-4 rounded-xl bg-zinc-950/50 border border-border focus:border-accent focus:ring-1 focus:ring-accent outline-none transition-all text-white"
+              className="w-full pl-12 pr-4 py-4 rounded-xl bg-zinc-950/50 border border-border focus:border-accent focus:ring-1 focus:ring-accent outline-none transition-all text-sm sm:text-base text-white"
               value={newEmail}
               onChange={(e) => setNewEmail(e.target.value)}
               required
             />
           </div>
-          <button className="bg-zinc-800 hover:bg-zinc-700 px-8 py-4 rounded-xl font-bold transition-all active:scale-[0.98]">
+          <button className="bg-zinc-800 hover:bg-zinc-700 py-4 px-8 rounded-xl font-bold transition-all active:scale-[0.98]">
             AUTHORIZE
           </button>
         </form>

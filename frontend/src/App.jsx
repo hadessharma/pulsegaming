@@ -158,35 +158,35 @@ function App() {
 
   return (
     <div className="flex flex-col items-center w-full max-w-4xl mx-auto p-4 min-h-screen font-sans">
-      <header className="flex justify-between items-center w-full mb-12 py-6 border-b border-white/5">
-        <h1 className="text-2xl font-black tracking-tighter font-display cursor-pointer" onClick={() => setView('game')}>
-          PULSE <span className="text-zinc-500 font-extralight">WORDLE</span>
+      <header className="flex flex-col sm:flex-row justify-between items-center w-full mb-8 sm:mb-12 py-4 sm:py-6 border-b border-white/5 gap-6 sm:gap-0">
+        <h1 className="text-xl sm:text-2xl font-black tracking-tighter font-display cursor-pointer" onClick={() => setView('game')}>
+          PULSE <span className="text-zinc-500 font-extralight text-lg sm:text-xl">WORDLE</span>
         </h1>
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-4 sm:gap-6 overflow-x-auto w-full sm:w-auto justify-center sm:justify-end py-2 sm:py-0">
           <button 
             onClick={() => setView('game')}
-            className={`font-bold text-sm tracking-widest uppercase transition-colors ${view === 'game' ? 'text-accent' : 'text-zinc-500 hover:text-zinc-300'}`}
+            className={`font-bold text-[10px] sm:text-sm tracking-widest uppercase transition-colors whitespace-nowrap ${view === 'game' ? 'text-accent' : 'text-zinc-500 hover:text-zinc-300'}`}
           >
             Game
           </button>
           <button 
             onClick={() => setView('leaderboard')}
-            className={`font-bold text-sm tracking-widest uppercase transition-colors ${view === 'leaderboard' ? 'text-accent' : 'text-zinc-500 hover:text-zinc-300'}`}
+            className={`font-bold text-[10px] sm:text-sm tracking-widest uppercase transition-colors whitespace-nowrap ${view === 'leaderboard' ? 'text-accent' : 'text-zinc-500 hover:text-zinc-300'}`}
           >
             Leaderboard
           </button>
           {userData?.is_admin && (
             <button 
               onClick={() => setView('admin')}
-              className={`font-bold text-sm tracking-widest uppercase transition-colors ${view === 'admin' ? 'text-accent shadow-[0_0_15px_rgba(139,92,246,0.3)]' : 'text-zinc-500 hover:text-zinc-300'}`}
+              className={`font-bold text-[10px] sm:text-sm tracking-widest uppercase transition-colors whitespace-nowrap ${view === 'admin' ? 'text-accent shadow-[0_0_15px_rgba(139,92,246,0.3)]' : 'text-zinc-500 hover:text-zinc-300'}`}
             >
               Admin
             </button>
           )}
-          <div className="h-4 w-[1px] bg-zinc-800" />
+          <div className="hidden sm:block h-4 w-[1px] bg-zinc-800" />
           <button 
             onClick={() => { logout(); setUser(null); setUserData(null); }}
-            className="text-zinc-600 hover:text-red-400 text-xs font-bold uppercase tracking-tighter transition-colors"
+            className="text-zinc-600 hover:text-red-400 text-[10px] sm:text-xs font-bold uppercase tracking-tighter transition-colors whitespace-nowrap"
           >
             Logout
           </button>
