@@ -5,13 +5,18 @@ import { Shield, UserPlus, Trash2, Mail, CheckCircle2, Gamepad2, PlayCircle, Sto
 
 const AdminPanel = () => {
   const [whitelist, setWhitelist] = useState([]);
+  const [activeGame, setActiveGame] = useState(null);
   const [newEmail, setNewEmail] = useState('');
   const [newWord, setNewWord] = useState('');
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState({ message: '', type: '' });
 
   useEffect(() => {
-    fetchWhitelist();
+    const init = async () => {
+      await Promise.all([fetchWhitelist(), fetchGameConfig()]);
+      setLoading(false);
+    };
+    init();
   }, []);
 
   const fetchWhitelist = async () => {
@@ -20,9 +25,16 @@ const AdminPanel = () => {
       setWhitelist(data);
     } catch (err) {
       console.error(err);
-      setStatus({ message: 'Failed to load whitelist. Admin access required.', type: 'error' });
-    } finally {
-      setLoading(false);
+      setStatus({ message: 'Failed to load whitelist.', type: 'error' });
+    }
+  };
+
+  const fetchGameConfig = async () => {
+    try {
+      const data = await api.getGameConfig();
+      setActiveGame(data.word_of_the_day ? data : null);
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -60,7 +72,8 @@ const AdminPanel = () => {
     try {
       await api.setGame(newWord);
       setNewWord('');
-      setStatus({ message: `Game started with word: ${newWord.toUpperCase()}`, type: 'success' });
+      setStatus({ message: `Game launched: ${newWord.toUpperCase()}`, type: 'success' });
+      fetchGameConfig();
       setTimeout(() => setStatus({ message: '', type: '' }), 3000);
     } catch (err) {
       setStatus({ message: 'Failed to set game word.', type: 'error' });
@@ -68,12 +81,14 @@ const AdminPanel = () => {
   };
 
   const handleStopGame = async () => {
+    if (!window.confirm("CRITICAL: This will delete the current word and ALL player progress. Continue?")) return;
     try {
       await api.stopGame();
-      setStatus({ message: 'Game has been stopped.', type: 'success' });
+      setStatus({ message: 'ARENA PURGED. All data cleared.', type: 'success' });
+      setActiveGame(null);
       setTimeout(() => setStatus({ message: '', type: '' }), 3000);
     } catch (err) {
-      setStatus({ message: 'Failed to stop game.', type: 'error' });
+      setStatus({ message: 'Failed to wipe arena.', type: 'error' });
     }
   };
 
@@ -97,9 +112,17 @@ const AdminPanel = () => {
 
       {/* Game Control Section */}
       <section className="glass-panel space-y-6">
-        <div className="flex items-center gap-2 mb-2">
-          <Gamepad2 className="w-5 h-5 text-accent" />
-          <h3 className="font-bold text-lg uppercase tracking-tight text-white">Active Game Control</h3>
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-2">
+            <Gamepad2 className="w-5 h-5 text-accent" />
+            <h3 className="font-bold text-lg uppercase tracking-tight text-white">Active Game Control</h3>
+          </div>
+          {activeGame && (
+            <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Active: {activeGame.word_of_the_day}</span>
+            </div>
+          )}
         </div>
         
         <div className="flex flex-col md:flex-row gap-4">
@@ -123,7 +146,7 @@ const AdminPanel = () => {
             className="px-6 py-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 font-bold flex items-center justify-center gap-2 hover:bg-red-500/20 transition-all active:scale-[0.98]"
           >
             <StopCircle className="w-5 h-5" />
-            STOP ARENA
+            WIPE ARENA
           </button>
         </div>
       </section>

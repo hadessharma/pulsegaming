@@ -160,14 +160,18 @@ const WordleGame = () => {
             </h2>
             <p className="text-zinc-500 mb-6 text-sm font-medium uppercase tracking-widest">Initial assessment complete</p>
             
-            <div className="grid grid-cols-2 gap-4 mb-8">
+            <div className="grid grid-cols-3 gap-3 mb-8">
               <div className="bg-zinc-950/50 p-4 rounded-xl border border-white/5">
                 <span className="block text-2xl font-black text-white">{gameState.guesses.length}</span>
                 <span className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest">Guesses</span>
               </div>
               <div className="bg-zinc-950/50 p-4 rounded-xl border border-white/5">
-                <span className="block text-2xl font-black text-present">{gameState.guesses.length + gameState.hints_used}</span>
-                <span className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest">Total Score</span>
+                <span className="block text-2xl font-black text-present">{gameState.hints_used}</span>
+                <span className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest">Hints</span>
+              </div>
+              <div className="bg-zinc-950/50 p-4 rounded-xl border border-white/5 ring-1 ring-accent/30">
+                <span className="block text-2xl font-black text-accent">{gameState.current_score}</span>
+                <span className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest">Score</span>
               </div>
             </div>
             

@@ -1,4 +1,5 @@
 import random
+import os
 from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
@@ -10,11 +11,13 @@ from database import engine
 
 models.Base.metadata.create_all(bind=engine)
 
-app = FastAPI()
+app = FastAPI(title="Pulse Wordle API")
 
+# Harden CORS for production
+origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:5173,http://localhost:5174").split(",")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -49,6 +52,7 @@ class GuessRequest(BaseModel):
 class UserResponse(BaseModel):
     id: int
     email: str
+    nickname: Optional[str] = None
     is_admin: bool
 
     class Config:
@@ -62,11 +66,12 @@ class WhitelistEmailResponse(BaseModel):
 
 class GameStateResponse(BaseModel):
     guesses: List[str]
-    feedback: List[List[str]] # Added feedback for each guess
+    feedback: List[List[str]]
     hints_used: int
     completed: bool
     won: bool
-    word_of_the_day: Optional[str] = None # Only reveal if completed
+    word_of_the_day: Optional[str] = None
+    current_score: int = 0 # Added to show score in UI
 
 def calculate_feedback(guess: str, secret: str) -> List[str]:
     """Calculate Wordle feedback: correct, present, absent."""
@@ -111,13 +116,19 @@ async def get_state(current_user: models.User = Depends(auth.get_current_user), 
         state.won = False
         db.commit()
     
+    score = 0
+    if state.completed and state.won:
+        score = 1000 + (6 - len(state.guesses)) * 100 - (state.hints_used * 100)
+        score = max(score, 500)
+
     return {
         "guesses": state.guesses,
         "feedback": [calculate_feedback(g, state.word_of_the_day) for g in state.guesses],
         "hints_used": state.hints_used,
         "completed": state.completed,
         "won": state.won,
-        "word_of_the_day": state.word_of_the_day if state.completed else None
+        "word_of_the_day": state.word_of_the_day if state.completed else None,
+        "current_score": score
     }
 
 @app.post("/guess")
@@ -142,6 +153,32 @@ async def submit_guess(request: GuessRequest, current_user: models.User = Depend
         state.won = False
     
     db.commit()
+
+    # If game just completed, calculate and save history
+    if state.completed:
+        # Check if already saved for this word
+        exists = db.query(models.GameHistory).filter(
+            models.GameHistory.user_id == current_user.id,
+            models.GameHistory.word == state.word_of_the_day
+        ).first()
+
+        if not exists:
+            score = 0
+            if state.won:
+                score = 1000 + (6 - len(state.guesses)) * 100 - (state.hints_used * 100)
+                score = max(score, 500) # Minimum 500 for a win
+            
+            history = models.GameHistory(
+                user_id=current_user.id,
+                word=state.word_of_the_day,
+                score=score,
+                guesses_count=len(state.guesses),
+                hints_count=state.hints_used,
+                won=state.won
+            )
+            db.add(history)
+            db.commit()
+
     return {"status": "ok", "completed": state.completed, "won": state.won}
 
 @app.post("/hint")
@@ -170,22 +207,41 @@ async def get_hint(current_user: models.User = Depends(auth.get_current_user), d
 
 @app.get("/leaderboard")
 async def get_leaderboard(db: Session = Depends(database.get_db)):
-    # Score = total guesses + hints_used
-    # Completed games first, sorted by score, then email
-    all_states = db.query(models.GameState).join(models.User).filter(models.GameState.completed == True).all()
+    # Sum scores from history per user
+    from sqlalchemy import func
+    
+    stats = db.query(
+        models.User.email,
+        models.User.nickname,
+        func.sum(models.GameHistory.score).label("total_score"),
+        func.count(models.GameHistory.id).label("games_played")
+    ).join(models.GameHistory).group_by(models.User.id).order_by(func.sum(models.GameHistory.score).desc()).all()
     
     results = []
-    for s in all_states:
-        score = len(s.guesses) + s.hints_used
+    for s in stats:
         results.append({
-            "email": s.user.email,
-            "guesses": len(s.guesses),
-            "hints": s.hints_used,
-            "score": score
+            "email": s.email,
+            "nickname": s.nickname or s.email.split('@')[0], # Fallback to email prefix
+            "score": int(s.total_score),
+            "games": s.games_played
         })
     
-    results.sort(key=lambda x: (x['score'], x['email']))
     return results
+
+@app.post("/me/nickname")
+async def update_nickname(data: dict, current_user: models.User = Depends(auth.get_current_user), db: Session = Depends(database.get_db)):
+    nickname = data.get("nickname", "").strip()
+    if not nickname or len(nickname) < 3 or len(nickname) > 15:
+        raise HTTPException(status_code=400, detail="Nickname must be 3-15 characters")
+    
+    # Check if taken
+    existing = db.query(models.User).filter(models.User.nickname == nickname).first()
+    if existing and existing.id != current_user.id:
+        raise HTTPException(status_code=400, detail="Nickname already taken")
+    
+    current_user.nickname = nickname
+    db.commit()
+    return {"status": "ok", "nickname": nickname}
 
 @app.get("/me", response_model=UserResponse)
 async def get_me(current_user: models.User = Depends(auth.get_current_user)):
@@ -218,6 +274,13 @@ async def remove_from_whitelist(email: str, db: Session = Depends(database.get_d
     db.commit()
     return {"status": "removed"}
 
+@app.get("/admin/game")
+async def get_game_config(db: Session = Depends(database.get_db), admin: models.User = Depends(auth.admin_required)):
+    config = db.query(models.GameConfig).first()
+    if not config:
+        return {"status": "no_game", "word_of_the_day": None, "is_active": False}
+    return config
+
 @app.post("/admin/game")
 async def set_game(data: dict, db: Session = Depends(database.get_db), admin: models.User = Depends(auth.admin_required)):
     word = data.get("word", "").upper()
@@ -239,9 +302,9 @@ async def set_game(data: dict, db: Session = Depends(database.get_db), admin: mo
     return {"status": "game started", "word": word}
 
 @app.delete("/admin/game")
-async def stop_game(db: Session = Depends(database.get_db), admin: models.User = Depends(auth.admin_required)):
-    config = db.query(models.GameConfig).first()
-    if config:
-        config.is_active = False
-        db.commit()
-    return {"status": "game stopped"}
+async def delete_game(db: Session = Depends(database.get_db), admin: models.User = Depends(auth.admin_required)):
+    # Total wipe of game config and all user sessions
+    db.query(models.GameConfig).delete()
+    db.query(models.GameState).delete()
+    db.commit()
+    return {"status": "wiped", "message": "All game data and sessions have been cleared."}

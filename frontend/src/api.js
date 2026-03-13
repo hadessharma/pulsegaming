@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { auth } from './firebase';
 
-const API_URL = 'http://localhost:8000';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 const api = axios.create({
   baseURL: API_URL,
@@ -47,6 +47,11 @@ export const getMe = async () => {
   return response.data;
 };
 
+export const updateNickname = async (nickname) => {
+  const response = await api.post('/me/nickname', { nickname });
+  return response.data;
+};
+
 export const getWhitelist = async () => {
   const response = await api.get('/admin/whitelist');
   return response.data;
@@ -69,5 +74,10 @@ export const setGame = async (word) => {
 
 export const stopGame = async () => {
   const response = await api.delete('/admin/game');
+  return response.data;
+};
+
+export const getGameConfig = async () => {
+  const response = await api.get('/admin/game');
   return response.data;
 };

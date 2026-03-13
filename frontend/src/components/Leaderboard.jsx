@@ -32,9 +32,8 @@ const Leaderboard = () => {
             <tr>
               <th className="p-5">#</th>
               <th className="p-5">Competitor</th>
-              <th className="p-5 text-center">Guesses</th>
-              <th className="p-5 text-center">Hints</th>
-              <th className="p-5 text-center">Total</th>
+              <th className="p-5 text-center">Sessions</th>
+              <th className="p-5 text-center">Total Pulse Score</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-white/5">
@@ -45,12 +44,11 @@ const Leaderboard = () => {
                     {i + 1}
                   </span>
                 </td>
-                <td className="p-5 font-medium text-sm text-zinc-300">{row.email}</td>
-                <td className="p-5 text-center font-mono text-xs">{row.guesses}</td>
-                <td className="p-5 text-center font-mono text-xs text-zinc-500">{row.hints}</td>
+                <td className="p-5 font-medium text-sm text-zinc-300">{row.nickname}</td>
+                <td className="p-5 text-center font-mono text-xs">{row.games}</td>
                 <td className="p-5 text-center">
                   <span className={`text-sm font-black ${i === 0 ? 'text-amber-500' : 'text-accent'}`}>
-                    {row.score}
+                    {row.score.toLocaleString()}
                   </span>
                 </td>
               </tr>

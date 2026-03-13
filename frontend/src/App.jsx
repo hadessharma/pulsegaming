@@ -6,6 +6,79 @@ import { motion } from 'framer-motion';
 import { signInWithGoogle, logout, subscribeToAuthChanges } from './firebase';
 
 import AdminPanel from './components/AdminPanel';
+import { User, Edit3, CheckCircle2 } from 'lucide-react';
+
+const NicknamePrompt = ({ onComplete }) => {
+  const [nickname, setNickname] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    try {
+      await api.updateNickname(nickname);
+      onComplete();
+    } catch (err) {
+      setError(err.response?.data?.detail || 'Failed to update nickname');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-dark/90 backdrop-blur-md">
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="w-full max-w-md glass-panel relative overflow-hidden"
+      >
+        <div className="absolute top-0 left-0 w-full h-1 premium-gradient" />
+        <div className="p-8">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-3 rounded-xl bg-accent/10 border border-accent/20">
+              <User className="w-6 h-6 text-accent" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-black tracking-tight text-white uppercase">Identity Required</h2>
+              <p className="text-zinc-500 text-xs font-medium uppercase tracking-widest">Entry into the arena</p>
+            </div>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] ml-1">Arena Handle</label>
+              <div className="relative">
+                <input
+                  autoFocus
+                  type="text"
+                  placeholder="E.G. PULSE_PILOT"
+                  className="w-full p-4 rounded-xl bg-zinc-950/50 border border-border focus:border-accent outline-none text-lg font-bold tracking-widest transition-all uppercase pl-12"
+                  value={nickname}
+                  onChange={(e) => setNickname(e.target.value.toUpperCase().replace(/[^A-Z0-9_]/g, ''))}
+                  maxLength={15}
+                />
+                <Edit3 className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-600" />
+              </div>
+              <p className="text-[9px] text-zinc-600 ml-1">3-15 chars. Letters, numbers, and underscores only.</p>
+            </div>
+
+            {error && <p className="text-red-400 text-sm font-medium text-center">{error}</p>}
+
+            <button 
+              disabled={loading || nickname.length < 3}
+              className="w-full premium-gradient p-4 rounded-xl font-bold text-lg hover:shadow-glow transition-all active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50 disabled:pointer-events-none"
+            >
+              {loading ? "AUTHENTICATING..." : "ENTER ARENA"}
+              {!loading && <CheckCircle2 className="w-5 h-5" />}
+            </button>
+          </form>
+        </div>
+      </motion.div>
+    </div>
+  );
+};
 
 function App() {
   const [user, setUser] = useState(null);
@@ -123,6 +196,10 @@ function App() {
       <main className="w-full">
         {renderView()}
       </main>
+
+      {user && userData && !userData.nickname && (
+        <NicknamePrompt onComplete={fetchUserData} />
+      )}
     </div>
   );
 }

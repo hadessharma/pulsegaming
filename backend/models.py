@@ -1,5 +1,6 @@
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, JSON
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, JSON, DateTime
 from sqlalchemy.orm import relationship
+from datetime import datetime
 from database import Base
 
 class User(Base):
@@ -7,6 +8,7 @@ class User(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     email = Column(String, unique=True, index=True)
+    nickname = Column(String, unique=True, index=True, nullable=True)
     is_admin = Column(Boolean, default=False)
 
     game_state = relationship("GameState", back_populates="user", uselist=False)
@@ -36,3 +38,17 @@ class GameConfig(Base):
     id = Column(Integer, primary_key=True, index=True)
     word_of_the_day = Column(String)
     is_active = Column(Boolean, default=True)
+
+class GameHistory(Base):
+    __tablename__ = "game_history"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"))
+    word = Column(String)
+    score = Column(Integer)
+    guesses_count = Column(Integer)
+    hints_count = Column(Integer)
+    won = Column(Boolean)
+    timestamp = Column(DateTime, default=datetime.utcnow)
+
+    user = relationship("User")

@@ -24,7 +24,15 @@ if "6543" in DATABASE_URL:
 
 connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
 
-engine = create_engine(DATABASE_URL, connect_args=connect_args, **db_config)
+# PostgreSQL Connection with optimized pooling for 50+ users
+engine = create_engine(
+    DATABASE_URL,
+    pool_size=10,
+    max_overflow=20,
+    pool_timeout=30,
+    pool_pre_ping=True,
+    connect_args=connect_args # Retain connect_args for SQLite compatibility
+)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
