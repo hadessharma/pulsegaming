@@ -81,17 +81,18 @@ const WordleGame = () => {
   while (rows.length < 6) rows.push('     ');
 
   const getCellClass = (char, index, guessIdx) => {
-    if (guessIdx >= gameState.guesses.length) return 'cell';
-    const word = gameState.word_of_the_day || ""; // Only available if won/lost
+    // Current active row (not yet submitted)
+    if (guessIdx === (gameState?.guesses?.length || 0) && !gameState?.completed) {
+      return char !== ' ' ? 'cell filled border-border shadow-md' : 'cell border-border/20';
+    }
     
-    // In a real wordle, you'd need the word to color client-side
-    // But since the backend handles it, we can just reveal the word if completed
-    // Or simpler: just use basic logic if we have the word
-    if (!word) return 'cell filled'; 
+    // Previous rows (using backend feedback)
+    if (gameState?.feedback && gameState.feedback[guessIdx]) {
+      const status = gameState.feedback[guessIdx][index];
+      return `cell ${status} scale-100 shadow-lg`;
+    }
 
-    if (char === word[index]) return 'cell correct';
-    if (word.includes(char)) return 'cell present';
-    return 'cell absent';
+    return 'cell border-border/20';
   };
 
   return (
@@ -107,11 +108,16 @@ const WordleGame = () => {
                   key={j} 
                   initial={false}
                   animate={{ 
-                    scale: isFilled ? [1, 1.1, 1] : 1,
+                    scale: char !== ' ' && i === (gameState?.guesses?.length || 0) ? [1, 1.1, 1] : 1,
                     rotateX: statusClass.includes('correct') || statusClass.includes('present') || statusClass.includes('absent') ? [0, 90, 0] : 0
                   }}
-                  transition={{ duration: 0.3, delay: j * 0.1 }}
-                  className={`${statusClass} ${char !== ' ' ? 'filled' : ''} shadow-lg`}
+                  transition={{ 
+                    type: "spring",
+                    stiffness: 300,
+                    damping: 20,
+                    delay: statusClass.includes('cell border') ? 0 : j * 0.1 
+                  }}
+                  className={`${statusClass} transition-colors duration-500`}
                 >
                   {char}
                 </motion.div>
@@ -181,11 +187,26 @@ const WordleGame = () => {
           <div key={i} className="flex justify-center gap-1.5 w-full">
             {row.map(key => {
               const isWide = key === 'ENTER' || key === 'DEL';
+              
+              // Key color logic
+              let keyStatus = '';
+              if (gameState?.guesses && gameState?.feedback) {
+                gameState.guesses.forEach((g, gIdx) => {
+                  const charIdx = g.indexOf(key);
+                  if (charIdx !== -1) {
+                    const status = gameState.feedback[gIdx][charIdx];
+                    if (status === 'correct') keyStatus = 'correct';
+                    else if (status === 'present' && keyStatus !== 'correct') keyStatus = 'present';
+                    else if (status === 'absent' && !keyStatus) keyStatus = 'absent';
+                  }
+                });
+              }
+
               return (
                 <button 
                   key={key} 
                   onClick={() => onKeyPress(key === 'DEL' ? 'BACKSPACE' : key)} 
-                  className={`key ${isWide ? 'large text-[10px]' : ''} hover:shadow-glow`}
+                  className={`key ${isWide ? 'large text-[10px]' : ''} ${keyStatus} hover:shadow-glow`}
                 >
                   {key}
                 </button>

@@ -62,10 +62,32 @@ class WhitelistEmailResponse(BaseModel):
 
 class GameStateResponse(BaseModel):
     guesses: List[str]
+    feedback: List[List[str]] # Added feedback for each guess
     hints_used: int
     completed: bool
     won: bool
     word_of_the_day: Optional[str] = None # Only reveal if completed
+
+def calculate_feedback(guess: str, secret: str) -> List[str]:
+    """Calculate Wordle feedback: correct, present, absent."""
+    result = ["absent"] * 5
+    secret_list = list(secret)
+    guess_list = list(guess)
+
+    # First pass: Find corrects (Green)
+    for i in range(5):
+        if guess_list[i] == secret_list[i]:
+            result[i] = "correct"
+            secret_list[i] = None # Mark as used
+            guess_list[i] = None
+
+    # Second pass: Find presents (Yellow)
+    for i in range(5):
+        if guess_list[i] is not None and guess_list[i] in secret_list:
+            result[i] = "present"
+            secret_list[secret_list.index(guess_list[i])] = None
+
+    return result
 
 @app.get("/state", response_model=GameStateResponse)
 async def get_state(current_user: models.User = Depends(auth.get_current_user), db: Session = Depends(database.get_db)):
@@ -91,6 +113,7 @@ async def get_state(current_user: models.User = Depends(auth.get_current_user), 
     
     return {
         "guesses": state.guesses,
+        "feedback": [calculate_feedback(g, state.word_of_the_day) for g in state.guesses],
         "hints_used": state.hints_used,
         "completed": state.completed,
         "won": state.won,

@@ -3,7 +3,7 @@
 @theme {
   --color-correct: #10b981;
   --color-present: #f59e0b;
-  --color-absent: #3f3f46;
+  --color-absent: #ef4444; /* Red for absent as requested */
   --color-border: #27272a;
   --color-dark: #09090b;
   --color-accent: #8b5cf6;
@@ -40,9 +40,9 @@ body {
 }
 
 .key.large { @apply px-6; }
-.key.correct { @apply bg-correct text-white; }
-.key.present { @apply bg-present text-white; }
-.key.absent { @apply bg-absent opacity-50; }
+.key.correct { @apply bg-correct text-white shadow-[0_0_10px_rgba(16,185,129,0.3)]; }
+.key.present { @apply bg-present text-white shadow-[0_0_10px_rgba(245,158,11,0.3)]; }
+.key.absent { @apply bg-absent text-white opacity-40; }
 
 .glass-panel {
   @apply bg-zinc-900/40 backdrop-blur-xl border border-white/5 shadow-2xl rounded-2xl p-8;
