@@ -10,3 +10,4 @@ firebase-admin
 pydantic[email]
 psycopg2-binary
 python-dotenv
+gunicorn

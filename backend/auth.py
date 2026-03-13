@@ -7,20 +7,25 @@ import models, database
 import os
 
 # Initialize Firebase Admin SDK
-service_account_path = os.getenv("FIREBASE_SERVICE_ACCOUNT", "serviceAccountKey.json")
-if os.path.exists(service_account_path):
-    if not firebase_admin._apps:
-        cred = credentials.Certificate(service_account_path)
-        firebase_admin.initialize_app(cred)
-else:
-    print(f"WARNING: Firebase service account key not found at {service_account_path}.")
-    if not firebase_admin._apps:
-        # We MUST initialize the app, even if it fails later during token verification
-        # This prevents "The default Firebase app does not exist" error
-        try:
+service_account_val = os.getenv("FIREBASE_SERVICE_ACCOUNT", "serviceAccountKey.json")
+
+if not firebase_admin._apps:
+    try:
+        if os.path.exists(service_account_val):
+            # It's a file path
+            cred = credentials.Certificate(service_account_val)
+            firebase_admin.initialize_app(cred)
+        elif service_account_val.startswith('{'):
+            # It's a JSON string
+            import json
+            service_account_info = json.loads(service_account_val)
+            cred = credentials.Certificate(service_account_info)
+            firebase_admin.initialize_app(cred)
+        else:
+            # Fallback for default initialization
             firebase_admin.initialize_app()
-        except Exception as e:
-            print(f"Could not initialize default Firebase app: {e}")
+    except Exception as e:
+        print(f"Firebase initialization warning: {e}")
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
