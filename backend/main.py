@@ -9,8 +9,8 @@ from pydantic import BaseModel, EmailStr
 import models, database, auth
 from database import engine
 
-models.Base.metadata.create_all(bind=engine)
 
+# models.Base.metadata.create_all(bind=engine) # Moved to startup_event
 app = FastAPI(title="Pulse Wordle API")
 
 # Harden CORS for production
@@ -210,15 +210,19 @@ async def get_hint(current_user: models.User = Depends(auth.get_current_user), d
 
 @app.get("/leaderboard")
 async def get_leaderboard(db: Session = Depends(database.get_db)):
-    # Sum scores from history per user
+    # Sum scores from history per user (including those with 0 games)
     from sqlalchemy import func
     
     stats = db.query(
         models.User.email,
         models.User.nickname,
-        func.sum(models.GameHistory.score).label("total_score"),
+        func.coalesce(func.sum(models.GameHistory.score), 0).label("total_score"),
         func.count(models.GameHistory.id).label("games_played")
-    ).join(models.GameHistory).group_by(models.User.id).order_by(func.sum(models.GameHistory.score).desc()).all()
+    ).outerjoin(models.GameHistory).group_by(
+        models.User.id, 
+        models.User.email, 
+        models.User.nickname
+    ).order_by(func.coalesce(func.sum(models.GameHistory.score), 0).desc()).all()
     
     results = []
     for s in stats:

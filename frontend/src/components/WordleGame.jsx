@@ -37,7 +37,11 @@ const WordleGame = () => {
   };
 
   useEffect(() => {
-    const handleKeyDown = (e) => onKeyPress(e.key.toUpperCase());
+    const handleKeyDown = (e) => {
+      // Ignore if typing in an input (like the nickname prompt)
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      onKeyPress(e.key.toUpperCase());
+    };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [currentGuess, gameState]);
