@@ -1,0 +1,34 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-dark text-white font-sans antialiased;
+  margin: 0;
+  display: flex;
+  place-items: center;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+#root {
+  width: 100%;
+}
+
+.cell {
+  @apply w-14 h-14 border-2 border-border flex items-center justify-center text-3xl font-bold uppercase transition-all duration-300;
+}
+
+.cell.correct { @apply bg-correct border-correct text-white; }
+.cell.present { @apply bg-present border-present text-white; }
+.cell.absent { @apply bg-absent border-absent text-white; }
+.cell.filled { @apply border-gray-500 scale-105; }
+
+.key {
+  @apply h-14 min-w-[2.5rem] px-2 bg-gray-500 rounded flex items-center justify-center font-bold uppercase cursor-pointer hover:bg-gray-400 active:scale-95 transition-all;
+}
+
+.key.large { @apply px-4; }
+.key.correct { @apply bg-correct; }
+.key.present { @apply bg-present; }
+.key.absent { @apply bg-absent; }
