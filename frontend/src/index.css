@@ -1,34 +1,53 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+  --color-correct: #10b981;
+  --color-present: #f59e0b;
+  --color-absent: #3f3f46;
+  --color-border: #27272a;
+  --color-dark: #09090b;
+  --color-accent: #8b5cf6;
+  
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Outfit", ui-sans-serif, system-ui, sans-serif;
+  
+  --shadow-glow: 0 0 20px -5px rgba(139, 92, 246, 0.3);
+}
 
 body {
-  @apply bg-dark text-white font-sans antialiased;
+  @apply bg-dark text-zinc-100 font-sans antialiased overflow-x-hidden;
   margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
   min-height: 100vh;
 }
 
 #root {
-  width: 100%;
+  @apply flex flex-col items-center w-full;
 }
 
 .cell {
-  @apply w-14 h-14 border-2 border-border flex items-center justify-center text-3xl font-bold uppercase transition-all duration-300;
+  @apply w-14 h-14 border-2 border-border flex items-center justify-center text-3xl font-extrabold uppercase transition-all duration-300 rounded-sm bg-zinc-900/50 backdrop-blur-sm;
+  font-family: var(--font-display);
 }
 
-.cell.correct { @apply bg-correct border-correct text-white; }
-.cell.present { @apply bg-present border-present text-white; }
+.cell.correct { @apply bg-correct border-correct text-white shadow-[0_0_15px_rgba(16,185,129,0.3)]; }
+.cell.present { @apply bg-present border-present text-white shadow-[0_0_15px_rgba(245,158,11,0.3)]; }
 .cell.absent { @apply bg-absent border-absent text-white; }
-.cell.filled { @apply border-gray-500 scale-105; }
+.cell.filled { @apply border-zinc-500 scale-105 bg-zinc-800; }
 
 .key {
-  @apply h-14 min-w-[2.5rem] px-2 bg-gray-500 rounded flex items-center justify-center font-bold uppercase cursor-pointer hover:bg-gray-400 active:scale-95 transition-all;
+  @apply h-14 min-w-[2.5rem] px-2 bg-zinc-800 rounded-md flex items-center justify-center font-bold uppercase cursor-pointer hover:bg-zinc-700 active:scale-95 transition-all text-sm;
+  font-family: var(--font-display);
 }
 
-.key.large { @apply px-4; }
-.key.correct { @apply bg-correct; }
-.key.present { @apply bg-present; }
-.key.absent { @apply bg-absent; }
+.key.large { @apply px-6; }
+.key.correct { @apply bg-correct text-white; }
+.key.present { @apply bg-present text-white; }
+.key.absent { @apply bg-absent opacity-50; }
+
+.glass-panel {
+  @apply bg-zinc-900/40 backdrop-blur-xl border border-white/5 shadow-2xl rounded-2xl p-8;
+}
+
+.premium-gradient {
+  @apply bg-gradient-to-br from-accent via-violet-600 to-indigo-700;
+}

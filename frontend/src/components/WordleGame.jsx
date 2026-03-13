@@ -80,54 +80,102 @@ const WordleGame = () => {
   };
 
   return (
-    <div className="flex flex-col items-center gap-8 w-full">
+    <div className="flex flex-col items-center gap-12 w-full max-w-md mx-auto">
       <div className="grid grid-rows-6 gap-2">
         {rows.map((guess, i) => (
           <div key={i} className="grid grid-cols-5 gap-2">
-            {guess.split('').map((char, j) => (
-              <motion.div 
-                key={j} 
-                initial={{ scale: 0.8 }}
-                animate={{ scale: 1 }}
-                className={`${getCellClass(char, j, i)} ${char !== ' ' ? 'filled' : ''}`}
-              >
-                {char}
-              </motion.div>
-            ))}
+            {guess.split('').map((char, j) => {
+              const statusClass = getCellClass(char, j, i);
+              const isFilled = char !== ' ' && i === gameState.guesses.length;
+              return (
+                <motion.div 
+                  key={j} 
+                  initial={false}
+                  animate={{ 
+                    scale: isFilled ? [1, 1.1, 1] : 1,
+                    rotateX: statusClass.includes('correct') || statusClass.includes('present') || statusClass.includes('absent') ? [0, 90, 0] : 0
+                  }}
+                  transition={{ duration: 0.3, delay: j * 0.1 }}
+                  className={`${statusClass} ${char !== ' ' ? 'filled' : ''} shadow-lg`}
+                >
+                  {char}
+                </motion.div>
+              );
+            })}
           </div>
         ))}
       </div>
 
-      <div className="flex flex-col items-center gap-4">
-        {message && <p className="bg-gray-800 p-2 rounded text-sm text-present font-bold uppercase">{message}</p>}
+      <div className="flex flex-col items-center gap-6 w-full">
+        {message && (
+          <motion.p 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-accent/20 border border-accent/30 p-3 rounded-lg text-xs text-accent font-bold uppercase tracking-widest text-center"
+          >
+            {message}
+          </motion.p>
+        )}
         
         {!gameState.completed && (
           <button 
             onClick={handleHint}
-            className="bg-present px-6 py-2 rounded font-bold hover:scale-105 transition-all"
+            className="flex items-center gap-2 group text-zinc-500 hover:text-present text-xs font-bold uppercase tracking-widest transition-all"
           >
-            GET HINT (+1 PENALTY)
+            <div className="w-8 h-8 rounded-full border border-zinc-800 flex items-center justify-center group-hover:border-present transition-colors">?</div>
+            Need a Hint? (+1 Penalty)
           </button>
         )}
 
         {gameState.completed && (
-          <div className="text-center">
-            <h2 className="text-4xl font-bold mb-2">{gameState.won ? 'VICTORY!' : 'DEFEAT'}</h2>
-            <p className="text-xl">SCORE: {gameState.guesses.length + gameState.hints_used}</p>
-            <p className="text-gray-400 mt-2 italic">The word was: {gameState.word_of_the_day}</p>
-          </div>
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="glass-panel w-full text-center relative overflow-hidden"
+          >
+            <div className={`absolute top-0 left-0 w-full h-1 ${gameState.won ? 'bg-correct' : 'bg-red-500'}`} />
+            <h2 className="text-4xl font-black mb-1 font-display uppercase tracking-tighter">
+              {gameState.won ? 'Legendary' : 'Not This Time'}
+            </h2>
+            <p className="text-zinc-500 mb-6 text-sm font-medium uppercase tracking-widest">Initial assessment complete</p>
+            
+            <div className="grid grid-cols-2 gap-4 mb-8">
+              <div className="bg-zinc-950/50 p-4 rounded-xl border border-white/5">
+                <span className="block text-2xl font-black text-white">{gameState.guesses.length}</span>
+                <span className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest">Guesses</span>
+              </div>
+              <div className="bg-zinc-950/50 p-4 rounded-xl border border-white/5">
+                <span className="block text-2xl font-black text-present">{gameState.guesses.length + gameState.hints_used}</span>
+                <span className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest">Total Score</span>
+              </div>
+            </div>
+            
+            <p className="text-xs text-zinc-600 font-bold uppercase tracking-widest mb-2">Target Word</p>
+            <div className="text-2xl font-black text-accent tracking-[0.5em]">{gameState.word_of_the_day}</div>
+          </motion.div>
         )}
       </div>
 
-      {/* Simple Virtual Keyboard */}
-      <div className="flex flex-col gap-2 max-w-lg w-full">
-        {['QWERTYUIOP', 'ASDFGHJKL', 'ZXCVBNM'].map((row, i) => (
-          <div key={i} className="flex justify-center gap-1">
-            {i === 2 && <button onClick={() => onKeyPress('ENTER')} className="key large">ENTER</button>}
-            {row.split('').map(key => (
-              <button key={key} onClick={() => onKeyPress(key)} className="key">{key}</button>
-            ))}
-            {i === 2 && <button onClick={() => onKeyPress('BACKSPACE')} className="key large">DEL</button>}
+      {/* Modern Virtual Keyboard */}
+      <div className="flex flex-col gap-2 w-full mt-4 select-none">
+        {[
+          ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
+          ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
+          ['ENTER', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', 'DEL']
+        ].map((row, i) => (
+          <div key={i} className="flex justify-center gap-1.5 w-full">
+            {row.map(key => {
+              const isWide = key === 'ENTER' || key === 'DEL';
+              return (
+                <button 
+                  key={key} 
+                  onClick={() => onKeyPress(key === 'DEL' ? 'BACKSPACE' : key)} 
+                  className={`key ${isWide ? 'large text-[10px]' : ''} hover:shadow-glow`}
+                >
+                  {key}
+                </button>
+              );
+            })}
           </div>
         ))}
       </div>

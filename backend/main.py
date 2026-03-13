@@ -36,21 +36,6 @@ class GameStateResponse(BaseModel):
     won: bool
     word_of_the_day: str = None # Only reveal if completed
 
-@app.post("/token", response_model=Token)
-async def login(email: str, db: Session = Depends(database.get_db)):
-    if email not in auth.WHITELIST:
-        raise HTTPException(status_code=400, detail="Email not whitelisted")
-    
-    user = db.query(models.User).filter(models.User.email == email).first()
-    if not user:
-        user = models.User(email=email)
-        db.add(user)
-        db.commit()
-        db.refresh(user)
-    
-    access_token = auth.create_access_token(data={"sub": user.email})
-    return {"access_token": access_token, "token_type": "bearer"}
-
 @app.get("/state", response_model=GameStateResponse)
 async def get_state(current_user: models.User = Depends(auth.get_current_user), db: Session = Depends(database.get_db)):
     state = db.query(models.GameState).filter(models.GameState.user_id == current_user.id).first()
