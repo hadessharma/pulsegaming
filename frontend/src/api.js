@@ -81,3 +81,8 @@ export const getGameConfig = async () => {
   const response = await api.get('/admin/game');
   return response.data;
 };
+
+export const clearLeaderboard = async () => {
+  const response = await api.delete('/admin/leaderboard');
+  return response.data;
+};

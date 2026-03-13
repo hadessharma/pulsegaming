@@ -311,3 +311,10 @@ async def delete_game(db: Session = Depends(database.get_db), admin: models.User
     db.query(models.GameState).delete()
     db.commit()
     return {"status": "wiped", "message": "All game data and sessions have been cleared."}
+
+@app.delete("/admin/leaderboard")
+async def reset_leaderboard(db: Session = Depends(database.get_db), admin: models.User = Depends(auth.admin_required)):
+    # Wipe all cumulative game history
+    db.query(models.GameHistory).delete()
+    db.commit()
+    return {"status": "reset", "message": "Leaderboard history has been cleared."}

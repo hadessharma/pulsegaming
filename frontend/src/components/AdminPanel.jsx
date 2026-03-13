@@ -91,9 +91,20 @@ const AdminPanel = () => {
       setStatus({ message: 'Failed to wipe arena.', type: 'error' });
     }
   };
-
+  
+  const handleResetLeaderboard = async () => {
+    if (!window.confirm("WARNING: This will permanently delete ALL cumulative scores and history from the leaderboard. This cannot be undone. Proceed?")) return;
+    try {
+      await api.clearLeaderboard();
+      setStatus({ message: 'Leaderboard history fully cleared.', type: 'success' });
+      setTimeout(() => setStatus({ message: '', type: '' }), 3000);
+    } catch (err) {
+      setStatus({ message: 'Failed to reset leaderboard.', type: 'error' });
+    }
+  };
+  
   if (loading) return <div className="p-8 text-center text-zinc-500 font-medium animate-pulse">Accessing Secure Vault...</div>;
-
+  
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
@@ -117,6 +128,12 @@ const AdminPanel = () => {
             <Gamepad2 className="w-5 h-5 text-accent" />
             <h3 className="font-bold text-lg uppercase tracking-tight text-white">Active Game Control</h3>
           </div>
+          <button 
+            onClick={handleResetLeaderboard}
+            className="text-[10px] font-black text-red-500/60 hover:text-red-500 uppercase tracking-widest transition-colors border-b border-red-500/20 hover:border-red-500"
+          >
+            Reset Leaderboard
+          </button>
           {activeGame && (
             <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
               <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
