@@ -41,3 +41,33 @@ export const getLeaderboard = async () => {
   const response = await api.get('/leaderboard');
   return response.data;
 };
+
+export const getMe = async () => {
+  const response = await api.get('/me');
+  return response.data;
+};
+
+export const getWhitelist = async () => {
+  const response = await api.get('/admin/whitelist');
+  return response.data;
+};
+
+export const addToWhitelist = async (email) => {
+  const response = await api.post('/admin/whitelist', { email });
+  return response.data;
+};
+
+export const removeFromWhitelist = async (email) => {
+  const response = await api.delete(`/admin/whitelist/${email}`);
+  return response.data;
+};
+
+export const setGame = async (word) => {
+  const response = await api.post('/admin/game', { word });
+  return response.data;
+};
+
+export const stopGame = async () => {
+  const response = await api.delete('/admin/game');
+  return response.data;
+};

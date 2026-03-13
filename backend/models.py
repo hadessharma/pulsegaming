@@ -7,7 +7,6 @@ class User(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     email = Column(String, unique=True, index=True)
-    hashed_password = Column(String) # We'll use a simple password or just email for this private contest
     is_admin = Column(Boolean, default=False)
 
     game_state = relationship("GameState", back_populates="user", uselist=False)
@@ -24,3 +23,16 @@ class GameState(Base):
     won = Column(Boolean, default=False)
     
     user = relationship("User", back_populates="game_state")
+
+class WhitelistedEmail(Base):
+    __tablename__ = "whitelisted_emails"
+
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String, unique=True, index=True)
+
+class GameConfig(Base):
+    __tablename__ = "game_config"
+
+    id = Column(Integer, primary_key=True, index=True)
+    word_of_the_day = Column(String)
+    is_active = Column(Boolean, default=True)

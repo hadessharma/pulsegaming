@@ -7,3 +7,6 @@ passlib[bcrypt]
 python-multipart
 cors
 firebase-admin
+pydantic[email]
+psycopg2-binary
+python-dotenv

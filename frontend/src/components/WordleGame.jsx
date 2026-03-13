@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import * as api from '../api';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import { HelpCircle, Trophy, SkipForward, PlayCircle } from 'lucide-react';
 
 const WordleGame = () => {
   const [gameState, setGameState] = useState(null);
@@ -16,7 +17,11 @@ const WordleGame = () => {
       const state = await api.getGameState();
       setGameState(state);
     } catch (err) {
-      console.error(err);
+      if (err.response?.status === 404) {
+        setGameState({ inactive: true });
+      } else {
+        console.error(err);
+      }
     }
   };
 
@@ -57,7 +62,17 @@ const WordleGame = () => {
     }
   };
 
-  if (!gameState) return <div>Loading...</div>;
+  if (!gameState) return <div className="p-8 text-center text-zinc-500 font-medium animate-pulse">Syncing with HQ...</div>;
+
+  if (gameState.inactive) {
+    return (
+      <div className="flex flex-col items-center justify-center p-12 glass-panel text-center max-w-md mx-auto">
+        <PlayCircle className="w-16 h-16 text-zinc-700 mb-6" />
+        <h2 className="text-2xl font-black font-display text-white mb-2 uppercase">Arena Offline</h2>
+        <p className="text-zinc-500 max-w-sm">The competition hasn't started yet. Waiting for the administrator to set the target word.</p>
+      </div>
+    );
+  }
 
   const rows = [...gameState.guesses];
   if (rows.length < 6 && !gameState.completed) {

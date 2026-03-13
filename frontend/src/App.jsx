@@ -5,20 +5,34 @@ import Leaderboard from './components/Leaderboard';
 import { motion } from 'framer-motion';
 import { signInWithGoogle, logout, subscribeToAuthChanges } from './firebase';
 
+import AdminPanel from './components/AdminPanel';
+
 function App() {
   const [user, setUser] = useState(null);
-  const [view, setView] = useState('game'); // 'game' or 'leaderboard'
+  const [userData, setUserData] = useState(null);
+  const [view, setView] = useState('game'); // 'game', 'leaderboard', 'admin'
   const [error, setError] = useState('');
 
   useEffect(() => {
     return subscribeToAuthChanges((firebaseUser) => {
       if (firebaseUser) {
         setUser(firebaseUser);
+        fetchUserData();
       } else {
         setUser(null);
+        setUserData(null);
       }
     });
   }, []);
+
+  const fetchUserData = async () => {
+    try {
+      const data = await api.getMe();
+      setUserData(data);
+    } catch (err) {
+      console.error("Failed to fetch user data", err);
+    }
+  };
 
   const handleLogin = async () => {
     try {
@@ -31,6 +45,7 @@ function App() {
   };
 
   if (!user) {
+    // ... existing login UI (minimized for brevity in target content)
     return (
       <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-dark text-white font-sans antialiased overflow-x-hidden">
         <motion.div 
@@ -60,10 +75,18 @@ function App() {
     );
   }
 
+  const renderView = () => {
+    switch(view) {
+      case 'leaderboard': return <Leaderboard />;
+      case 'admin': return <AdminPanel />;
+      default: return <WordleGame />;
+    }
+  };
+
   return (
-    <div className="flex flex-col items-center w-full max-w-2xl mx-auto p-4 min-h-screen font-sans">
+    <div className="flex flex-col items-center w-full max-w-4xl mx-auto p-4 min-h-screen font-sans">
       <header className="flex justify-between items-center w-full mb-12 py-6 border-b border-white/5">
-        <h1 className="text-2xl font-black tracking-tighter font-display">
+        <h1 className="text-2xl font-black tracking-tighter font-display cursor-pointer" onClick={() => setView('game')}>
           PULSE <span className="text-zinc-500 font-extralight">WORDLE</span>
         </h1>
         <div className="flex items-center gap-6">
@@ -79,9 +102,17 @@ function App() {
           >
             Leaderboard
           </button>
+          {userData?.is_admin && (
+            <button 
+              onClick={() => setView('admin')}
+              className={`font-bold text-sm tracking-widest uppercase transition-colors ${view === 'admin' ? 'text-accent shadow-[0_0_15px_rgba(139,92,246,0.3)]' : 'text-zinc-500 hover:text-zinc-300'}`}
+            >
+              Admin
+            </button>
+          )}
           <div className="h-4 w-[1px] bg-zinc-800" />
           <button 
-            onClick={() => { logout(); setUser(null); }}
+            onClick={() => { logout(); setUser(null); setUserData(null); }}
             className="text-zinc-600 hover:text-red-400 text-xs font-bold uppercase tracking-tighter transition-colors"
           >
             Logout
@@ -90,7 +121,7 @@ function App() {
       </header>
 
       <main className="w-full">
-        {view === 'game' ? <WordleGame /> : <Leaderboard />}
+        {renderView()}
       </main>
     </div>
   );
