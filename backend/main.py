@@ -14,7 +14,10 @@ models.Base.metadata.create_all(bind=engine)
 app = FastAPI(title="Pulse Wordle API")
 
 # Harden CORS for production
-origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:5173,http://localhost:5174").split(",")
+raw_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:5173,http://localhost:5174")
+origins = [origin.strip().rstrip('/') for origin in raw_origins.split(",")]
+# Add version with slash just in case browsers send it (though they shouldn't for origin)
+origins += [f"{o}/" for o in origins] 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
