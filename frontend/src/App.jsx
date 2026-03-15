@@ -8,6 +8,7 @@ import { signInWithGoogle, logout, subscribeToAuthChanges } from './firebase';
 import AdminPanel from './components/AdminPanel';
 import { User, Edit3, CheckCircle2, Gamepad2, Zap, Trophy } from 'lucide-react';
 
+
 const EnterGameCard = ({ onEnter }) => {
   return (
     <div className="flex items-center justify-center w-full p-4 py-12">
@@ -194,7 +195,6 @@ function App() {
   };
 
   if (!user) {
-    // ... existing login UI (minimized for brevity in target content)
     return (
       <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-dark text-white font-sans antialiased overflow-x-hidden">
         <motion.div 
@@ -276,9 +276,9 @@ function App() {
         {renderView()}
       </main>
 
-      {user && userData && !userData.nickname && (
-        <NicknamePrompt onComplete={fetchUserData} />
-      )}
+        {user && userData && !userData.nickname && (
+          <NicknamePrompt onComplete={fetchUserData} />
+        )}
     </div>
   );
 }
