@@ -7,6 +7,7 @@ const WordleGame = () => {
   const [gameState, setGameState] = useState(null);
   const [currentGuess, setCurrentGuess] = useState('');
   const [message, setMessage] = useState('');
+  const [showHelp, setShowHelp] = useState(false);
 
   useEffect(() => {
     fetchState();
@@ -66,14 +67,14 @@ const WordleGame = () => {
     }
   };
 
-  if (!gameState) return <div className="p-8 text-center text-zinc-500 font-medium animate-pulse">Syncing with HQ...</div>;
+  if (!gameState) return <div className="p-8 text-center text-zinc-500 font-medium animate-pulse">Connecting to server...</div>;
 
   if (gameState.inactive) {
     return (
       <div className="flex flex-col items-center justify-center p-12 glass-panel text-center max-w-md mx-auto">
         <PlayCircle className="w-16 h-16 text-zinc-700 mb-6" />
-        <h2 className="text-2xl font-black font-display text-white mb-2 uppercase">Arena Offline</h2>
-        <p className="text-zinc-500 max-w-sm">The competition hasn't started yet. Waiting for the administrator to set the target word.</p>
+        <h2 className="text-2xl font-black font-display text-white mb-2 uppercase">Game Offline</h2>
+        <p className="text-zinc-500 max-w-sm">The game hasn't started yet. Waiting for the administrator to set the word.</p>
       </div>
     );
   }
@@ -101,6 +102,16 @@ const WordleGame = () => {
 
   return (
     <div className="flex flex-col items-center gap-6 sm:gap-12 w-full max-w-md mx-auto">
+      <div className="flex justify-end w-full px-2 -mb-8 sm:-mb-14">
+        <button 
+          onClick={() => setShowHelp(true)}
+          className="p-2 text-zinc-500 hover:text-accent transition-colors"
+          title="Scoring Rules"
+        >
+          <HelpCircle className="w-6 h-6" />
+        </button>
+      </div>
+
       <div className="grid grid-rows-6 gap-1.5 sm:gap-2">
         {rows.map((guess, i) => (
           <div key={i} className="grid grid-cols-5 gap-1.5 sm:gap-2">
@@ -160,9 +171,9 @@ const WordleGame = () => {
           >
             <div className={`absolute top-0 left-0 w-full h-1 ${gameState.won ? 'bg-correct' : 'bg-red-500'}`} />
             <h2 className="text-4xl font-black mb-1 font-display uppercase tracking-tighter">
-              {gameState.won ? 'Legendary' : 'Not This Time'}
+              {gameState.won ? 'You Won!' : 'Better Luck Next Time'}
             </h2>
-            <p className="text-zinc-500 mb-6 text-sm font-medium uppercase tracking-widest">Initial assessment complete</p>
+            <p className="text-zinc-500 mb-6 text-sm font-medium uppercase tracking-widest">Game Over</p>
             
             <div className="grid grid-cols-3 gap-3 mb-8">
               <div className="bg-zinc-950/50 p-4 rounded-xl border border-white/5">
@@ -178,6 +189,13 @@ const WordleGame = () => {
                 <span className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest">Score</span>
               </div>
             </div>
+            
+            <button 
+              onClick={() => setShowHelp(true)}
+              className="text-[10px] text-zinc-500 hover:text-accent font-bold uppercase tracking-widest mb-6 transition-colors"
+            >
+              How is this calculated?
+            </button>
             
             <p className="text-xs text-zinc-600 font-bold uppercase tracking-widest mb-2">Target Word</p>
             <div className="text-2xl font-black text-accent tracking-[0.5em]">{gameState.word_of_the_day}</div>
@@ -223,6 +241,65 @@ const WordleGame = () => {
           </div>
         ))}
       </div>
+
+
+      <AnimatePresence>
+        {showHelp && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-dark/90 backdrop-blur-sm"
+            onClick={() => setShowHelp(false)}
+          >
+            <motion.div 
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              className="w-full max-w-sm glass-panel relative overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="absolute top-0 left-0 w-full h-1 premium-gradient" />
+              
+              <h2 className="text-2xl font-black text-white uppercase tracking-tight mb-6">Scoring Rules</h2>
+              
+              <div className="space-y-6">
+                <section className="space-y-3">
+                  <h3 className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Points</h3>
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-zinc-400">Base Win</span>
+                      <span className="font-bold text-white">+1,000</span>
+                    </div>
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-zinc-400">Each unused guess</span>
+                      <span className="font-bold text-correct">+100</span>
+                    </div>
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-zinc-400">Each hint used</span>
+                      <span className="font-bold text-red-500">-100</span>
+                    </div>
+                  </div>
+                </section>
+
+                <div className="h-[1px] bg-white/5" />
+
+                <section className="space-y-3 text-xs leading-relaxed text-zinc-500 italic">
+                  <p>A minimum of 500 points is awarded for any win.</p>
+                  <p>Losing result in 0 points.</p>
+                </section>
+
+                <button 
+                  onClick={() => setShowHelp(false)}
+                  className="w-full bg-zinc-800 hover:bg-zinc-700 p-4 rounded-xl font-bold uppercase tracking-widest transition-all"
+                >
+                  Got it
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

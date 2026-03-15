@@ -16,6 +16,16 @@ api.interceptors.request.use(async (config) => {
   return config;
 });
 
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (!error.response || (error.response.status >= 502 && error.response.status <= 504)) {
+      error.message = "Wait a minute or 2 for the backend to start.";
+    }
+    return Promise.reject(error);
+  }
+);
+
 export const login = async (email) => {
   const response = await api.post(`/token?email=${email}`);
   localStorage.setItem('token', response.data.access_token);

@@ -2,11 +2,43 @@ import React, { useState, useEffect } from 'react';
 import * as api from './api';
 import WordleGame from './components/WordleGame';
 import Leaderboard from './components/Leaderboard';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { signInWithGoogle, logout, subscribeToAuthChanges } from './firebase';
 
 import AdminPanel from './components/AdminPanel';
-import { User, Edit3, CheckCircle2 } from 'lucide-react';
+import { User, Edit3, CheckCircle2, Gamepad2, Zap, Trophy } from 'lucide-react';
+
+const EnterGameCard = ({ onEnter }) => {
+  return (
+    <div className="flex items-center justify-center w-full p-4 py-12">
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.9, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        className="w-full max-w-md glass-panel relative overflow-hidden text-center"
+      >
+        <div className="absolute top-0 left-0 w-full h-1 premium-gradient" />
+        
+        <div className="w-24 h-24 bg-accent/10 border border-accent/20 rounded-3xl flex items-center justify-center mx-auto mb-8 rotate-3 hover:rotate-0 transition-transform duration-500">
+          <Gamepad2 className="w-12 h-12 text-accent" />
+        </div>
+
+        <h2 className="text-4xl font-black text-white uppercase tracking-tighter mb-4">
+          Pulse <span className="text-accent underline decoration-violet-500/30">Wordle</span>
+        </h2>
+        
+        <div className="space-y-4">
+          <button 
+            onClick={onEnter}
+            className="w-full premium-gradient p-5 rounded-2xl font-black text-xl hover:shadow-glow transition-all active:scale-[0.98] uppercase tracking-[0.2em] flex items-center justify-center gap-3 group"
+          >
+            Enter Game
+            <Zap className="w-6 h-6 fill-white group-hover:scale-125 transition-transform" />
+          </button>
+        </div>
+      </motion.div>
+    </div>
+  );
+};
 
 const NicknamePrompt = ({ onComplete }) => {
   const [nickname, setNickname] = useState('');
@@ -51,14 +83,14 @@ const NicknamePrompt = ({ onComplete }) => {
                   <User className="w-6 h-6 text-accent" />
                 </div>
                 <div>
-                  <h2 className="text-2xl font-black tracking-tight text-white uppercase">Identity Required</h2>
-                  <p className="text-zinc-500 text-xs font-medium uppercase tracking-widest">Entry into the arena</p>
+                  <h2 className="text-2xl font-black tracking-tight text-white uppercase">Set Nickname</h2>
+                  <p className="text-zinc-500 text-xs font-medium uppercase tracking-widest">Enter your name</p>
                 </div>
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] ml-1">Arena Handle</label>
+                  <label className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] ml-1">Nickname</label>
                   <div className="relative">
                     <input
                       autoFocus
@@ -80,7 +112,7 @@ const NicknamePrompt = ({ onComplete }) => {
                   disabled={loading || nickname.length < 3}
                   className="w-full premium-gradient p-4 rounded-xl font-bold text-lg hover:shadow-glow transition-all active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50 disabled:pointer-events-none"
                 >
-                  {loading ? "AUTHENTICATING..." : "VERIFY IDENTITY"}
+                  {loading ? "AUTHENTICATING..." : "CONTINUE"}
                   {!loading && <CheckCircle2 className="w-5 h-5" />}
                 </button>
               </form>
@@ -120,6 +152,7 @@ function App() {
   const [userData, setUserData] = useState(null);
   const [view, setView] = useState('game'); // 'game', 'leaderboard', 'admin'
   const [error, setError] = useState('');
+  const [hasEnteredGame, setHasEnteredGame] = useState(false);
 
   useEffect(() => {
     return subscribeToAuthChanges((firebaseUser) => {
@@ -139,16 +172,24 @@ function App() {
       setUserData(data);
     } catch (err) {
       console.error("Failed to fetch user data", err);
+      if (err.response?.status === 403) {
+        setError(err.response.data.detail || "Login with your ASU ID");
+        logout();
+        setUser(null);
+        setUserData(null);
+      } else if (!err.response) {
+        setError(err.message); // Will be the message from interceptor if it's a network error
+      }
     }
   };
 
   const handleLogin = async () => {
+    setError('');
     try {
       await signInWithGoogle();
-      setError('');
     } catch (err) {
       console.error(err);
-      setError('Login failed. Please use a whitelisted email.');
+      setError(err.message || 'Login failed. Please use a whitelisted email.');
     }
   };
 
@@ -166,16 +207,15 @@ function App() {
           <h1 className="text-5xl font-black mb-2 tracking-tighter text-center font-display">
             PULSE<span className="text-accent underline decoration-violet-500/30">WORDLE</span>
           </h1>
-          <p className="text-zinc-500 text-center mb-8 text-sm font-medium uppercase tracking-widest">Elite Competition Series</p>
           
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-4 mt-8">
             <button 
               onClick={handleLogin}
               className="premium-gradient p-4 rounded-xl font-bold text-xl hover:shadow-glow transition-all active:scale-[0.98] flex items-center justify-center gap-2"
             >
               Sign in with Google
             </button>
-            <p className="text-zinc-500 text-center text-xs">Must be an authorized competition participant.</p>
+            <p className="text-zinc-500 text-center text-xs">Sign in to start playing.</p>
             {error && <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-red-400 text-center text-sm font-medium">{error}</motion.p>}
           </div>
         </motion.div>
@@ -187,7 +227,11 @@ function App() {
     switch(view) {
       case 'leaderboard': return <Leaderboard />;
       case 'admin': return <AdminPanel />;
-      default: return <WordleGame />;
+      default: 
+        if (!hasEnteredGame) {
+          return <EnterGameCard onEnter={() => setHasEnteredGame(true)} />;
+        }
+        return <WordleGame />;
     }
   };
 
@@ -220,7 +264,7 @@ function App() {
           )}
           <div className="hidden sm:block h-4 w-[1px] bg-zinc-800" />
           <button 
-            onClick={() => { logout(); setUser(null); setUserData(null); }}
+            onClick={() => { logout(); setUser(null); setUserData(null); setHasEnteredGame(false); }}
             className="text-zinc-600 hover:text-red-400 text-[10px] sm:text-xs font-bold uppercase tracking-tighter transition-colors whitespace-nowrap"
           >
             Logout

@@ -53,7 +53,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
         if not whitelisted and (user is None or not user.is_admin):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="Email not whitelisted"
+                detail="Login with your ASU ID"
             )
             
     except Exception as e:
