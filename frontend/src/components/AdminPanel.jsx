@@ -8,6 +8,7 @@ const AdminPanel = () => {
   const [activeGame, setActiveGame] = useState(null);
   const [newEmail, setNewEmail] = useState('');
   const [newWord, setNewWord] = useState('');
+  const [newHint, setNewHint] = useState('');
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState({ message: '', type: '' });
 
@@ -70,8 +71,9 @@ const AdminPanel = () => {
       return;
     }
     try {
-      await api.setGame(newWord);
+      await api.setGame(newWord, newHint);
       setNewWord('');
+      setNewHint('');
       setStatus({ message: `Game launched: ${newWord.toUpperCase()}`, type: 'success' });
       fetchGameConfig();
       setTimeout(() => setStatus({ message: '', type: '' }), 3000);
@@ -151,6 +153,12 @@ const AdminPanel = () => {
               className="flex-1 p-4 rounded-xl bg-zinc-950/50 border border-border focus:border-accent outline-none text-center font-black tracking-[0.5em] text-xl transition-all uppercase"
               value={newWord}
               onChange={(e) => setNewWord(e.target.value.replace(/[^a-zA-Z]/g, ''))}
+            />
+            <textarea
+              placeholder="OPTIONAL GAME HINT (e.g. 'A fruit', 'Famous painter')"
+              className="flex-1 p-4 rounded-xl bg-zinc-950/50 border border-border focus:border-accent outline-none text-sm transition-all resize-none h-14"
+              value={newHint}
+              onChange={(e) => setNewHint(e.target.value)}
             />
             <button className="premium-gradient py-4 sm:py-0 px-6 rounded-xl font-bold flex items-center justify-center gap-2 hover:shadow-glow transition-all active:scale-[0.98]">
               <PlayCircle className="w-5 h-5" />

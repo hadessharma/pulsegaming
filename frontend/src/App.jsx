@@ -190,7 +190,11 @@ function App() {
       await signInWithGoogle();
     } catch (err) {
       console.error(err);
-      setError(err.message || 'Login failed. Please use a whitelisted email.');
+      if (err.message?.includes('missing initial state')) {
+        setError('Login failed due to browser security settings. If you are on an iPhone/Safari, please go to Settings > Safari and turn OFF "Prevent Cross-Site Tracking".');
+      } else {
+        setError(err.message || 'Login failed. Please use a whitelisted email.');
+      }
     }
   };
 

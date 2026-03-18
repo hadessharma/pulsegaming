@@ -17,6 +17,9 @@ const WordleGame = () => {
     try {
       const state = await api.getGameState();
       setGameState(state);
+      if (state.hint) {
+        setMessage(`HINT: ${state.hint}`);
+      }
     } catch (err) {
       if (err.response?.status === 404) {
         setGameState({ inactive: true });
@@ -59,8 +62,8 @@ const WordleGame = () => {
 
   const handleHint = async () => {
     try {
-      const hint = await api.getHint();
-      setMessage(`HINT: '${hint.letter}' is at position ${hint.position + 1}`);
+      const data = await api.getHint();
+      setMessage(`HINT: ${data.hint}`);
       fetchState();
     } catch (err) {
       setMessage(err.response?.data?.detail || 'Error');

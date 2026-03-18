@@ -37,6 +37,7 @@ class GameConfig(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     word_of_the_day = Column(String)
+    hint = Column(String, nullable=True)
     is_active = Column(Boolean, default=True)
 
 class GameHistory(Base):

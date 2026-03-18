@@ -77,8 +77,8 @@ export const removeFromWhitelist = async (email) => {
   return response.data;
 };
 
-export const setGame = async (word) => {
-  const response = await api.post('/admin/game', { word });
+export const setGame = async (word, hint) => {
+  const response = await api.post('/admin/game', { word, hint });
   return response.data;
 };
 

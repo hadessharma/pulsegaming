@@ -74,6 +74,7 @@ class GameStateResponse(BaseModel):
     completed: bool
     won: bool
     word_of_the_day: Optional[str] = None
+    hint: Optional[str] = None
     current_score: int = 0 # Added to show score in UI
 
 def calculate_feedback(guess: str, secret: str) -> List[str]:
@@ -131,6 +132,7 @@ async def get_state(current_user: models.User = Depends(auth.get_current_user), 
         "completed": state.completed,
         "won": state.won,
         "word_of_the_day": state.word_of_the_day if state.completed else None,
+        "hint": config.hint if state.hints_used > 0 else None,
         "current_score": score
     }
 
@@ -186,27 +188,19 @@ async def submit_guess(request: GuessRequest, current_user: models.User = Depend
 
 @app.post("/hint")
 async def get_hint(current_user: models.User = Depends(auth.get_current_user), db: Session = Depends(database.get_db)):
+    config = db.query(models.GameConfig).first()
+    if not config or not config.is_active:
+        raise HTTPException(status_code=404, detail="No active game.")
+
     state = db.query(models.GameState).filter(models.GameState.user_id == current_user.id).first()
     if state.completed:
         raise HTTPException(status_code=400, detail="Game already completed")
     
-    # Logic to find a letter not yet revealed in its correct position
-    word = state.word_of_the_day
-    correct_positions = [False] * 5
-    for g in state.guesses:
-        for i, char in enumerate(g):
-            if char == word[i]:
-                correct_positions[i] = True
+    if state.hints_used == 0:
+        state.hints_used = 1
+        db.commit()
     
-    available_indices = [i for i, val in enumerate(correct_positions) if not val]
-    if not available_indices:
-        raise HTTPException(status_code=400, detail="No more hints available")
-    
-    hint_idx = random.choice(available_indices)
-    state.hints_used += 1
-    db.commit()
-    
-    return {"letter": word[hint_idx], "position": hint_idx}
+    return {"hint": config.hint}
 
 @app.get("/leaderboard")
 async def get_leaderboard(db: Session = Depends(database.get_db)):
@@ -291,15 +285,17 @@ async def get_game_config(db: Session = Depends(database.get_db), admin: models.
 @app.post("/admin/game")
 async def set_game(data: dict, db: Session = Depends(database.get_db), admin: models.User = Depends(auth.admin_required)):
     word = data.get("word", "").upper()
+    hint = data.get("hint", "").strip()
     if len(word) != 5:
         raise HTTPException(status_code=400, detail="Word must be 5 letters")
     
     config = db.query(models.GameConfig).first()
     if not config:
-        config = models.GameConfig(word_of_the_day=word, is_active=True)
+        config = models.GameConfig(word_of_the_day=word, hint=hint, is_active=True)
         db.add(config)
     else:
         config.word_of_the_day = word
+        config.hint = hint
         config.is_active = True
     
     # Reset all user states for the new word

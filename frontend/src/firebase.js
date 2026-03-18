@@ -1,5 +1,13 @@
 import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "firebase/auth";
+import { 
+  getAuth, 
+  GoogleAuthProvider, 
+  signInWithPopup, 
+  signOut, 
+  onAuthStateChanged,
+  browserLocalPersistence,
+  setPersistence
+} from "firebase/auth";
 
 // Replace with your Firebase config from the Firebase Console
 const firebaseConfig = {
@@ -14,6 +22,10 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
+
+// Use local persistence to ensure state is not lost as easily on mobile
+setPersistence(auth, browserLocalPersistence);
+
 const googleProvider = new GoogleAuthProvider();
 
 export const signInWithGoogle = () => signInWithPopup(auth, googleProvider);
