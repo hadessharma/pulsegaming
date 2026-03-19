@@ -3,6 +3,7 @@ import os
 from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
+from sqlalchemy import inspect, text
 from typing import List, Optional
 from pydantic import BaseModel, EmailStr
 
@@ -40,12 +41,41 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+def ensure_game_config_hint_column() -> None:
+    """
+    The app's SQLAlchemy models include `game_config.hint`, but older deployments may
+    have created the table before this column existed. This prevents runtime 500s.
+    """
+    try:
+        inspector = inspect(engine)
+        if "game_config" not in inspector.get_table_names():
+            return
+
+        columns = {c["name"] for c in inspector.get_columns("game_config")}
+        if "hint" in columns:
+            return
+
+        # SQLite supports `ALTER TABLE ... ADD COLUMN`, Postgres also does.
+        dialect = engine.dialect.name
+        hint_type = "TEXT" if dialect == "sqlite" else "VARCHAR"
+
+        with engine.begin() as conn:
+            conn.execute(text(f"ALTER TABLE game_config ADD COLUMN hint {hint_type}"))
+
+        print("Added missing `game_config.hint` column to DB schema.")
+    except Exception as e:
+        # Don't crash the app on startup; routes will fail with a useful error if needed.
+        print(f"Warning: could not ensure `game_config.hint` column exists: {e}")
+
 @app.on_event("startup")
 async def startup_event():
     db = database.SessionLocal()
     try:
         # Create tables
         models.Base.metadata.create_all(bind=engine)
+
+        # Ensure the hint column exists for older DB schemas.
+        ensure_game_config_hint_column()
         
         # Seed whitelist if empty
         if db.query(models.WhitelistedEmail).count() == 0:
@@ -155,7 +185,7 @@ async def get_state(current_user: models.User = Depends(auth.get_current_user), 
         "completed": state.completed,
         "won": state.won,
         "word_of_the_day": current_word if state.completed else None,
-        "hint": config.hint if state.hints_used > 0 else None,
+        "hint": getattr(config, "hint", None) if state.hints_used > 0 else None,
         "current_score": score
     }
 
