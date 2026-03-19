@@ -14,10 +14,24 @@ from database import engine
 app = FastAPI(title="Pulse Wordle API")
 
 # Harden CORS for production
-raw_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:5173,http://localhost:5174")
-origins = [origin.strip().rstrip('/') for origin in raw_origins.split(",")]
-# Add version with slash just in case browsers send it (though they shouldn't for origin)
+allowed_origins_env = os.getenv("ALLOWED_ORIGINS", "")
+origins = [origin.strip().rstrip('/') for origin in allowed_origins_env.split(",") if origin.strip()]
+
+# Common production and development defaults
+default_origins = [
+    "http://localhost:5173",
+    "http://localhost:5174",
+    "https://pulsegaming.vercel.app",
+    "https://pulsegaming.onrender.com"
+]
+
+for origin in default_origins:
+    if origin not in origins:
+        origins.append(origin)
+
+# Add version with slash just in case browsers send it 
 origins += [f"{o}/" for o in origins] 
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -79,9 +93,12 @@ class GameStateResponse(BaseModel):
 
 def calculate_feedback(guess: str, secret: str) -> List[str]:
     """Calculate Wordle feedback: correct, present, absent."""
+    if not secret or not guess or len(secret) != 5 or len(guess) != 5:
+        return ["absent"] * 5
+        
     result = ["absent"] * 5
-    secret_list = list(secret)
-    guess_list = list(guess)
+    secret_list = list(secret.upper())
+    guess_list = list(guess.upper())
 
     # First pass: Find corrects (Green)
     for i in range(5):
@@ -120,18 +137,24 @@ async def get_state(current_user: models.User = Depends(auth.get_current_user), 
         state.won = False
         db.commit()
     
+    # Defensive check: Ensure guesses is a list
+    guesses = state.guesses if isinstance(state.guesses, list) else []
+    
     score = 0
     if state.completed and state.won:
-        score = 1000 + (6 - len(state.guesses)) * 100 - (state.hints_used * 100)
+        score = 1000 + (6 - len(guesses)) * 100 - (state.hints_used * 100)
         score = max(score, 500)
 
+    # Ensure word_of_the_day is not None for feedback calculation
+    current_word = state.word_of_the_day or config.word_of_the_day or "PULSE"
+
     return {
-        "guesses": state.guesses,
-        "feedback": [calculate_feedback(g, state.word_of_the_day) for g in state.guesses],
+        "guesses": guesses,
+        "feedback": [calculate_feedback(g, current_word) for g in guesses],
         "hints_used": state.hints_used,
         "completed": state.completed,
         "won": state.won,
-        "word_of_the_day": state.word_of_the_day if state.completed else None,
+        "word_of_the_day": current_word if state.completed else None,
         "hint": config.hint if state.hints_used > 0 else None,
         "current_score": score
     }

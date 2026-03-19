@@ -58,7 +58,9 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
             
     except Exception as e:
         if isinstance(e, HTTPException): raise e
-        print(f"Auth error: {e}")
+        print(f"Auth error during token verification or DB check: {str(e)}")
+        import traceback
+        traceback.print_exc()
         raise credentials_exception
     
     if user is None:
