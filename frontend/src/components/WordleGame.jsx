@@ -17,9 +17,6 @@ const WordleGame = () => {
     try {
       const state = await api.getGameState();
       setGameState(state);
-      if (state.hint) {
-        setMessage(`HINT: ${state.hint}`);
-      }
     } catch (err) {
       if (err.response?.status === 404) {
         setGameState({ inactive: true });
@@ -61,13 +58,7 @@ const WordleGame = () => {
   };
 
   const handleHint = async () => {
-    try {
-      const data = await api.getHint();
-      setMessage(`HINT: ${data.hint}`);
-      fetchState();
-    } catch (err) {
-      setMessage(err.response?.data?.detail || 'Error');
-    }
+    // Redundant now as hint is always visible, but keeping the function for now or removing it
   };
 
   if (!gameState) return <div className="p-8 text-center text-zinc-500 font-medium animate-pulse">Connecting to server...</div>;
@@ -156,14 +147,13 @@ const WordleGame = () => {
           </motion.p>
         )}
         
-        {!gameState.completed && (
-          <button 
-            onClick={handleHint}
-            className="flex items-center gap-2 group text-zinc-500 hover:text-present text-xs font-bold uppercase tracking-widest transition-all"
-          >
-            <div className="w-8 h-8 rounded-full border border-zinc-800 flex items-center justify-center group-hover:border-present transition-colors">?</div>
-            Need a Hint? (+1 Penalty)
-          </button>
+        {gameState.hint && !gameState.completed && (
+          <div className="bg-accent/10 border border-accent/20 p-4 rounded-xl text-center w-full max-w-sm">
+            <span className="block text-[10px] text-zinc-500 font-black uppercase tracking-[0.2em] mb-1">Current Hint</span>
+            <p className="text-sm text-accent font-medium leading-relaxed italic">
+              "{gameState.hint}"
+            </p>
+          </div>
         )}
 
         {gameState.completed && (
@@ -183,8 +173,8 @@ const WordleGame = () => {
                 <span className="block text-2xl font-black text-white">{gameState.guesses.length}</span>
                 <span className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest">Guesses</span>
               </div>
-              <div className="bg-zinc-950/50 p-4 rounded-xl border border-white/5">
-                <span className="block text-2xl font-black text-present">{gameState.hints_used}</span>
+              <div className="bg-zinc-950/50 p-4 rounded-xl border border-white/5 opacity-40">
+                <span className="block text-2xl font-black text-present">0</span>
                 <span className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest">Hints</span>
               </div>
               <div className="bg-zinc-950/50 p-4 rounded-xl border border-white/5 ring-1 ring-accent/30">
@@ -279,8 +269,8 @@ const WordleGame = () => {
                       <span className="font-bold text-correct">+100</span>
                     </div>
                     <div className="flex justify-between items-center text-sm">
-                      <span className="text-zinc-400">Each hint used</span>
-                      <span className="font-bold text-red-500">-100</span>
+                      <span className="text-zinc-400">Hints</span>
+                      <span className="font-bold text-correct text-[10px] uppercase tracking-wider">Always Free</span>
                     </div>
                   </div>
                 </section>

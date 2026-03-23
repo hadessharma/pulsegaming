@@ -172,7 +172,7 @@ async def get_state(current_user: models.User = Depends(auth.get_current_user), 
     
     score = 0
     if state.completed and state.won:
-        score = 1000 + (6 - len(guesses)) * 100 - (state.hints_used * 100)
+        score = 1000 + (6 - len(guesses)) * 100
         score = max(score, 500)
 
     # Ensure word_of_the_day is not None for feedback calculation
@@ -185,7 +185,7 @@ async def get_state(current_user: models.User = Depends(auth.get_current_user), 
         "completed": state.completed,
         "won": state.won,
         "word_of_the_day": current_word if state.completed else None,
-        "hint": getattr(config, "hint", None) if state.hints_used > 0 else None,
+        "hint": getattr(config, "hint", None),
         "current_score": score
     }
 
@@ -223,7 +223,7 @@ async def submit_guess(request: GuessRequest, current_user: models.User = Depend
         if not exists:
             score = 0
             if state.won:
-                score = 1000 + (6 - len(state.guesses)) * 100 - (state.hints_used * 100)
+                score = 1000 + (6 - len(state.guesses)) * 100
                 score = max(score, 500) # Minimum 500 for a win
             
             history = models.GameHistory(
@@ -249,9 +249,7 @@ async def get_hint(current_user: models.User = Depends(auth.get_current_user), d
     if state.completed:
         raise HTTPException(status_code=400, detail="Game already completed")
     
-    if state.hints_used == 0:
-        state.hints_used = 1
-        db.commit()
+    # Always return hint, don't increment hints_used as it's free now
     
     return {"hint": config.hint}
 
