@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import GameCard from '../components/GameCard';
-import { Gamepad2, Swords, Users, Dice5 } from 'lucide-react';
+import { Gamepad2, Users } from 'lucide-react';
 
 const HomePage = () => {
   return (
@@ -36,14 +36,7 @@ const HomePage = () => {
           accentColor="accent"
         />
 
-        <GameCard
-          title="Word Duel"
-          description="Head-to-head word battles. Challenge your friends in real-time."
-          icon={Swords}
-          route="/duel"
-          accentColor="accent"
-          comingSoon
-        />
+
       </div>
     </div>
   );
