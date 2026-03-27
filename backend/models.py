@@ -38,6 +38,7 @@ class GameConfig(Base):
     id = Column(Integer, primary_key=True, index=True)
     word_of_the_day = Column(String)
     hint = Column(String, nullable=True)
+    tutor_trivia_day = Column(Integer, default=1)
     is_active = Column(Boolean, default=True)
 
 class GameHistory(Base):
@@ -50,6 +51,26 @@ class GameHistory(Base):
     guesses_count = Column(Integer)
     hints_count = Column(Integer)
     won = Column(Boolean)
+    game_type = Column(String, default="wordle", index=True)
+    is_ranked = Column(Boolean, default=True, index=True)
     timestamp = Column(DateTime, default=datetime.utcnow)
+
+    user = relationship("User")
+
+
+class TutorTriviaState(Base):
+    __tablename__ = "tutor_trivia_states"
+    __table_args__ = (
+        # one session per user per day
+        {"sqlite_autoincrement": True},
+    )
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    day = Column(Integer, nullable=False, index=True)
+    tutor_order = Column(JSON, default=[])        # shuffled list of tutor IDs
+    current_index = Column(Integer, default=0)     # which tutor we are on
+    wrong_guesses = Column(JSON, default={})       # {str(tutor_id): count}
+    completed = Column(Boolean, default=False)
 
     user = relationship("User")

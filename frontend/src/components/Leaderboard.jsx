@@ -1,21 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import * as api from '../api';
 import { motion } from 'framer-motion';
+import { Gamepad2, Trophy, Users } from 'lucide-react';
+
+const FILTERS = [
+  { key: null, label: 'All Games', icon: Trophy },
+  { key: 'wordle', label: 'Wordle', icon: Gamepad2 },
+  { key: 'tutor_trivia', label: 'Tutor Trivia', icon: Users },
+];
 
 const Leaderboard = () => {
   const [stats, setStats] = useState([]);
+  const [activeFilter, setActiveFilter] = useState(null);
+
+  const fetchLeaderboard = async (gameType) => {
+    try {
+      const data = await api.getLeaderboard(gameType);
+      setStats(data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   useEffect(() => {
-    const fetchLeaderboard = async () => {
-      try {
-        const data = await api.getLeaderboard();
-        setStats(data);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-    fetchLeaderboard();
-  }, []);
+    fetchLeaderboard(activeFilter);
+  }, [activeFilter]);
 
   return (
     <motion.div 
@@ -24,7 +33,25 @@ const Leaderboard = () => {
       className="w-full glass-panel overflow-hidden relative"
     >
       <div className="absolute top-0 left-0 w-full h-1 premium-gradient" />
-      <h2 className="text-2xl font-black mb-8 font-display tracking-tight text-center">COMPETITOR RANKINGS</h2>
+      <h2 className="text-2xl font-black mb-6 font-display tracking-tight text-center">COMPETITOR RANKINGS</h2>
+
+      {/* Game filter tabs */}
+      <div className="flex items-center justify-center gap-2 mb-8">
+        {FILTERS.map(({ key, label, icon: Icon }) => (
+          <button
+            key={label}
+            onClick={() => setActiveFilter(key)}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all ${
+              activeFilter === key
+                ? 'premium-gradient text-white shadow-glow'
+                : 'bg-zinc-900/60 text-zinc-500 border border-white/5 hover:text-zinc-300 hover:border-white/10'
+            }`}
+          >
+            <Icon className="w-3.5 h-3.5" />
+            {label}
+          </button>
+        ))}
+      </div>
       
       <div className="overflow-x-auto">
         <table className="w-full text-left">
@@ -33,7 +60,9 @@ const Leaderboard = () => {
               <th className="p-5">#</th>
               <th className="p-5">Competitor</th>
               <th className="p-5 text-center">Sessions</th>
-              <th className="p-5 text-center">Total Pulse Score</th>
+              <th className="p-5 text-center">
+                {activeFilter ? `${activeFilter} Score` : 'Total Pulse Score'}
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-white/5">

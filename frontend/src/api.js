@@ -47,8 +47,9 @@ export const getHint = async () => {
   return response.data;
 };
 
-export const getLeaderboard = async () => {
-  const response = await api.get('/leaderboard');
+export const getLeaderboard = async (gameType) => {
+  const params = gameType ? { game_type: gameType } : {};
+  const response = await api.get('/leaderboard', { params });
   return response.data;
 };
 
@@ -94,5 +95,15 @@ export const getGameConfig = async () => {
 
 export const clearLeaderboard = async () => {
   const response = await api.delete('/admin/leaderboard');
+  return response.data;
+};
+
+export const updateTutorDay = async (day) => {
+  const response = await api.post('/admin/game/tutor-trivia', { day });
+  return response.data;
+};
+
+export const incrementTutorDay = async () => {
+  const response = await api.post('/admin/game/tutor-trivia/next-day');
   return response.data;
 };

@@ -2,6 +2,7 @@ import random
 import os
 from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 from sqlalchemy import inspect, text
 from typing import List, Optional
@@ -9,10 +10,12 @@ from pydantic import BaseModel, EmailStr
 
 import models, database, auth
 from database import engine
+from games.wordle.router import router as wordle_router
+from games.tutor_trivia.router import router as tutor_trivia_router
 
 
 # models.Base.metadata.create_all(bind=engine) # Moved to startup_event
-app = FastAPI(title="Pulse Wordle API")
+app = FastAPI(title="PulseGaming API")
 
 # Harden CORS for production
 allowed_origins_env = os.getenv("ALLOWED_ORIGINS", "")
@@ -67,6 +70,58 @@ def ensure_game_config_hint_column() -> None:
         # Don't crash the app on startup; routes will fail with a useful error if needed.
         print(f"Warning: could not ensure `game_config.hint` column exists: {e}")
 
+def ensure_game_history_game_type_column() -> None:
+    """Ensure the game_type column exists on game_history for older DBs."""
+    try:
+        inspector = inspect(engine)
+        if "game_history" not in inspector.get_table_names():
+            return
+
+        columns = {c["name"] for c in inspector.get_columns("game_history")}
+        if "game_type" in columns:
+            return
+
+        dialect = engine.dialect.name
+        col_type = "TEXT" if dialect == "sqlite" else "VARCHAR"
+
+        with engine.begin() as conn:
+            conn.execute(text(f"ALTER TABLE game_history ADD COLUMN game_type {col_type} DEFAULT 'wordle'"))
+
+        print("Added missing `game_history.game_type` column to DB schema.")
+    except Exception as e:
+        print(f"Warning: could not ensure `game_history.game_type` column exists: {e}")
+
+def ensure_game_config_tutor_trivia_day_column() -> None:
+    try:
+        inspector = inspect(engine)
+        if "game_config" not in inspector.get_table_names():
+            return
+        columns = {c["name"] for c in inspector.get_columns("game_config")}
+        if "tutor_trivia_day" in columns:
+            return
+        with engine.begin() as conn:
+            conn.execute(text("ALTER TABLE game_config ADD COLUMN tutor_trivia_day INTEGER DEFAULT 1"))
+        print("Added missing `game_config.tutor_trivia_day` column.")
+    except Exception as e:
+        print(f"Warning: could not ensure `game_config.tutor_trivia_day` column: {e}")
+
+def ensure_game_history_is_ranked_column() -> None:
+    try:
+        inspector = inspect(engine)
+        if "game_history" not in inspector.get_table_names():
+            return
+        columns = {c["name"] for c in inspector.get_columns("game_history")}
+        if "is_ranked" in columns:
+            return
+        dialect = engine.dialect.name
+        bool_type = "INTEGER" if dialect == "sqlite" else "BOOLEAN"
+        default_val = "1" if dialect == "sqlite" else "TRUE"
+        with engine.begin() as conn:
+            conn.execute(text(f"ALTER TABLE game_history ADD COLUMN is_ranked {bool_type} DEFAULT {default_val}"))
+        print("Added missing `game_history.is_ranked` column.")
+    except Exception as e:
+        print(f"Warning: could not ensure `game_history.is_ranked` column: {e}")
+
 @app.on_event("startup")
 async def startup_event():
     db = database.SessionLocal()
@@ -74,8 +129,11 @@ async def startup_event():
         # Create tables
         models.Base.metadata.create_all(bind=engine)
 
-        # Ensure the hint column exists for older DB schemas.
+        # Ensure columns exist for older DB schemas
         ensure_game_config_hint_column()
+        ensure_game_history_game_type_column()
+        ensure_game_config_tutor_trivia_day_column()
+        ensure_game_history_is_ranked_column()
         
         # Seed whitelist if empty
         if db.query(models.WhitelistedEmail).count() == 0:
@@ -87,14 +145,27 @@ async def startup_event():
     finally:
         db.close()
 
-# WORD_OF_THE_DAY = "PULSE" # Replaced by GameConfig in DB
 
-class Token(BaseModel):
-    access_token: str
-    token_type: str
+# ── Mount game sub-routers ──────────────────────────────────────────
+app.include_router(wordle_router)
+app.include_router(tutor_trivia_router)
 
-class GuessRequest(BaseModel):
-    guess: str
+
+# ── Backward-compatibility redirects (old flat routes → /wordle/*) ──
+@app.get("/state")
+async def legacy_state():
+    return RedirectResponse(url="/wordle/state", status_code=307)
+
+@app.post("/guess")
+async def legacy_guess():
+    return RedirectResponse(url="/wordle/guess", status_code=307)
+
+@app.post("/hint")
+async def legacy_hint():
+    return RedirectResponse(url="/wordle/hint", status_code=307)
+
+
+# ── Shared routes (users, leaderboard, admin) ──────────────────────
 
 class UserResponse(BaseModel):
     id: int
@@ -111,159 +182,23 @@ class WhitelistEmailResponse(BaseModel):
     class Config:
         from_attributes = True
 
-class GameStateResponse(BaseModel):
-    guesses: List[str]
-    feedback: List[List[str]]
-    hints_used: int
-    completed: bool
-    won: bool
-    word_of_the_day: Optional[str] = None
-    hint: Optional[str] = None
-    current_score: int = 0 # Added to show score in UI
-
-def calculate_feedback(guess: str, secret: str) -> List[str]:
-    """Calculate Wordle feedback: correct, present, absent."""
-    if not secret or not guess or len(secret) != 5 or len(guess) != 5:
-        return ["absent"] * 5
-        
-    result = ["absent"] * 5
-    secret_list = list(secret.upper())
-    guess_list = list(guess.upper())
-
-    # First pass: Find corrects (Green)
-    for i in range(5):
-        if guess_list[i] == secret_list[i]:
-            result[i] = "correct"
-            secret_list[i] = None # Mark as used
-            guess_list[i] = None
-
-    # Second pass: Find presents (Yellow)
-    for i in range(5):
-        if guess_list[i] is not None and guess_list[i] in secret_list:
-            result[i] = "present"
-            secret_list[secret_list.index(guess_list[i])] = None
-
-    return result
-
-@app.get("/state", response_model=GameStateResponse)
-async def get_state(current_user: models.User = Depends(auth.get_current_user), db: Session = Depends(database.get_db)):
-    config = db.query(models.GameConfig).first()
-    if not config or not config.is_active:
-        raise HTTPException(status_code=404, detail="No active game at the moment.")
-
-    state = db.query(models.GameState).filter(models.GameState.user_id == current_user.id).first()
-    if not state:
-        state = models.GameState(user_id=current_user.id, word_of_the_day=config.word_of_the_day)
-        db.add(state)
-        db.commit()
-        db.refresh(state)
-    
-    # Ensure user has the current word if the admin changed it
-    if state.word_of_the_day != config.word_of_the_day:
-        state.word_of_the_day = config.word_of_the_day
-        state.guesses = []
-        state.hints_used = 0
-        state.completed = False
-        state.won = False
-        db.commit()
-    
-    # Defensive check: Ensure guesses is a list
-    guesses = state.guesses if isinstance(state.guesses, list) else []
-    
-    score = 0
-    if state.completed and state.won:
-        score = 1000 + (6 - len(guesses)) * 100
-        score = max(score, 500)
-
-    # Ensure word_of_the_day is not None for feedback calculation
-    current_word = state.word_of_the_day or config.word_of_the_day or "PULSE"
-
-    return {
-        "guesses": guesses,
-        "feedback": [calculate_feedback(g, current_word) for g in guesses],
-        "hints_used": state.hints_used,
-        "completed": state.completed,
-        "won": state.won,
-        "word_of_the_day": current_word if state.completed else None,
-        "hint": getattr(config, "hint", None),
-        "current_score": score
-    }
-
-@app.post("/guess")
-async def submit_guess(request: GuessRequest, current_user: models.User = Depends(auth.get_current_user), db: Session = Depends(database.get_db)):
-    state = db.query(models.GameState).filter(models.GameState.user_id == current_user.id).first()
-    if state.completed:
-        raise HTTPException(status_code=400, detail="Game already completed")
-    
-    guess = request.guess.upper()
-    if len(guess) != 5:
-        raise HTTPException(status_code=400, detail="Guess must be 5 letters")
-    
-    new_guesses = list(state.guesses)
-    new_guesses.append(guess)
-    state.guesses = new_guesses
-    
-    if guess == state.word_of_the_day:
-        state.completed = True
-        state.won = True
-    elif len(new_guesses) >= 6:
-        state.completed = True
-        state.won = False
-    
-    db.commit()
-
-    # If game just completed, calculate and save history
-    if state.completed:
-        # Check if already saved for this word
-        exists = db.query(models.GameHistory).filter(
-            models.GameHistory.user_id == current_user.id,
-            models.GameHistory.word == state.word_of_the_day
-        ).first()
-
-        if not exists:
-            score = 0
-            if state.won:
-                score = 1000 + (6 - len(state.guesses)) * 100
-                score = max(score, 500) # Minimum 500 for a win
-            
-            history = models.GameHistory(
-                user_id=current_user.id,
-                word=state.word_of_the_day,
-                score=score,
-                guesses_count=len(state.guesses),
-                hints_count=state.hints_used,
-                won=state.won
-            )
-            db.add(history)
-            db.commit()
-
-    return {"status": "ok", "completed": state.completed, "won": state.won}
-
-@app.post("/hint")
-async def get_hint(current_user: models.User = Depends(auth.get_current_user), db: Session = Depends(database.get_db)):
-    config = db.query(models.GameConfig).first()
-    if not config or not config.is_active:
-        raise HTTPException(status_code=404, detail="No active game.")
-
-    state = db.query(models.GameState).filter(models.GameState.user_id == current_user.id).first()
-    if state.completed:
-        raise HTTPException(status_code=400, detail="Game already completed")
-    
-    # Always return hint, don't increment hints_used as it's free now
-    
-    return {"hint": config.hint}
 
 @app.get("/leaderboard")
-async def get_leaderboard(db: Session = Depends(database.get_db)):
-    # Sum scores from history per user (including those with 0 games)
+async def get_leaderboard(game_type: Optional[str] = None, db: Session = Depends(database.get_db)):
+    # Sum scores from history per user, optionally filtered by game_type
     from sqlalchemy import func
+
+    # Build the join condition — if a game_type filter is specified, add it
+    join_condition = (models.GameHistory.user_id == models.User.id) & (models.GameHistory.is_ranked == True)
+    if game_type:
+        join_condition = (join_condition) & (models.GameHistory.game_type == game_type)
     
     stats = db.query(
         models.User.email,
         models.User.nickname,
         func.coalesce(func.sum(models.GameHistory.score), 0).label("total_score"),
         func.count(models.GameHistory.id).label("games_played")
-    ).outerjoin(models.GameHistory).group_by(
+    ).outerjoin(models.GameHistory, join_condition).group_by(
         models.User.id, 
         models.User.email, 
         models.User.nickname
@@ -273,7 +208,7 @@ async def get_leaderboard(db: Session = Depends(database.get_db)):
     for s in stats:
         results.append({
             "email": s.email,
-            "nickname": s.nickname or s.email.split('@')[0], # Fallback to email prefix
+            "nickname": s.nickname or s.email.split('@')[0],
             "score": int(s.total_score),
             "games": s.games_played
         })
@@ -354,6 +289,35 @@ async def set_game(data: dict, db: Session = Depends(database.get_db), admin: mo
     
     db.commit()
     return {"status": "game started", "word": word}
+
+@app.post("/admin/game/tutor-trivia")
+async def update_tutor_trivia_config(data: dict, db: Session = Depends(database.get_db), admin: models.User = Depends(auth.admin_required)):
+    day = data.get("day")
+    if day is None:
+        raise HTTPException(status_code=400, detail="Day is required")
+    
+    config = db.query(models.GameConfig).first()
+    if not config:
+        config = models.GameConfig(tutor_trivia_day=day, is_active=True)
+        db.add(config)
+    else:
+        config.tutor_trivia_day = day
+    
+    db.commit()
+    return {"status": "updated", "tutor_trivia_day": day}
+
+@app.post("/admin/game/tutor-trivia/next-day")
+async def next_tutor_trivia_day(db: Session = Depends(database.get_db), admin: models.User = Depends(auth.admin_required)):
+    config = db.query(models.GameConfig).first()
+    if not config:
+        config = models.GameConfig(tutor_trivia_day=2, is_active=True)
+        db.add(config)
+    else:
+        # Wrap around or cap at 5 since data only has 1-5 currently
+        config.tutor_trivia_day = (config.tutor_trivia_day % 5) + 1
+    
+    db.commit()
+    return {"status": "advanced", "tutor_trivia_day": config.tutor_trivia_day}
 
 @app.delete("/admin/game")
 async def delete_game(db: Session = Depends(database.get_db), admin: models.User = Depends(auth.admin_required)):

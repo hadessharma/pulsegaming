@@ -1,45 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import * as api from './api';
-import WordleGame from './components/WordleGame';
-import Leaderboard from './components/Leaderboard';
+import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { signInWithGoogle, logout, subscribeToAuthChanges } from './firebase';
+import * as api from './api';
 
-import AdminPanel from './components/AdminPanel';
-import { User, Edit3, CheckCircle2, Gamepad2, Zap, Trophy } from 'lucide-react';
-
-
-const EnterGameCard = ({ onEnter }) => {
-  return (
-    <div className="flex items-center justify-center w-full p-4 py-12">
-      <motion.div 
-        initial={{ opacity: 0, scale: 0.9, y: 20 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        className="w-full max-w-md glass-panel relative overflow-hidden text-center"
-      >
-        <div className="absolute top-0 left-0 w-full h-1 premium-gradient" />
-        
-        <div className="w-24 h-24 bg-accent/10 border border-accent/20 rounded-3xl flex items-center justify-center mx-auto mb-8 rotate-3 hover:rotate-0 transition-transform duration-500">
-          <Gamepad2 className="w-12 h-12 text-accent" />
-        </div>
-
-        <h2 className="text-4xl font-black text-white uppercase tracking-tighter mb-4">
-          Pulse <span className="text-accent underline decoration-violet-500/30">Wordle</span>
-        </h2>
-        
-        <div className="space-y-4">
-          <button 
-            onClick={onEnter}
-            className="w-full premium-gradient p-5 rounded-2xl font-black text-xl hover:shadow-glow transition-all active:scale-[0.98] uppercase tracking-[0.2em] flex items-center justify-center gap-3 group"
-          >
-            Enter Game
-            <Zap className="w-6 h-6 fill-white group-hover:scale-125 transition-transform" />
-          </button>
-        </div>
-      </motion.div>
-    </div>
-  );
-};
+import { User, Edit3, CheckCircle2 } from 'lucide-react';
 
 const NicknamePrompt = ({ onComplete }) => {
   const [nickname, setNickname] = useState('');
@@ -138,7 +103,7 @@ const NicknamePrompt = ({ onComplete }) => {
                 onClick={onComplete}
                 className="w-full premium-gradient p-5 rounded-xl font-black text-xl hover:shadow-glow transition-all active:scale-[0.98] uppercase tracking-widest"
               >
-                Enter the Game
+                Enter the Arena
               </button>
             </motion.div>
           )}
@@ -151,9 +116,8 @@ const NicknamePrompt = ({ onComplete }) => {
 function App() {
   const [user, setUser] = useState(null);
   const [userData, setUserData] = useState(null);
-  const [view, setView] = useState('game'); // 'game', 'leaderboard', 'admin'
   const [error, setError] = useState('');
-  const [hasEnteredGame, setHasEnteredGame] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     return subscribeToAuthChanges((firebaseUser) => {
@@ -179,7 +143,7 @@ function App() {
         setUser(null);
         setUserData(null);
       } else if (!err.response) {
-        setError(err.message); // Will be the message from interceptor if it's a network error
+        setError(err.message);
       }
     }
   };
@@ -198,6 +162,13 @@ function App() {
     }
   };
 
+  const handleLogout = () => {
+    logout();
+    setUser(null);
+    setUserData(null);
+    navigate('/');
+  };
+
   if (!user) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-dark text-white font-sans antialiased overflow-x-hidden">
@@ -209,7 +180,7 @@ function App() {
           <div className="absolute top-0 left-0 w-full h-1 premium-gradient" />
           
           <h1 className="text-5xl font-black mb-2 tracking-tighter text-center font-display">
-            PULSE<span className="text-accent underline decoration-violet-500/30">WORDLE</span>
+            PULSE<span className="text-accent underline decoration-violet-500/30">GAMING</span>
           </h1>
           
           <div className="flex flex-col gap-4 mt-8">
@@ -227,48 +198,30 @@ function App() {
     );
   }
 
-  const renderView = () => {
-    switch(view) {
-      case 'leaderboard': return <Leaderboard />;
-      case 'admin': return <AdminPanel />;
-      default: 
-        if (!hasEnteredGame) {
-          return <EnterGameCard onEnter={() => setHasEnteredGame(true)} />;
-        }
-        return <WordleGame />;
-    }
-  };
+  const navLinkClass = ({ isActive }) =>
+    `font-bold text-[10px] sm:text-sm tracking-widest uppercase transition-colors whitespace-nowrap ${isActive ? 'text-accent' : 'text-zinc-500 hover:text-zinc-300'}`;
 
   return (
     <div className="flex flex-col items-center w-full max-w-4xl mx-auto p-4 min-h-screen font-sans">
       <header className="flex flex-col sm:flex-row justify-between items-center w-full mb-8 sm:mb-12 py-4 sm:py-6 border-b border-white/5 gap-6 sm:gap-0">
-        <h1 className="text-xl sm:text-2xl font-black tracking-tighter font-display cursor-pointer" onClick={() => setView('game')}>
-          PULSE <span className="text-zinc-500 font-extralight text-lg sm:text-xl">WORDLE</span>
+        <h1 className="text-xl sm:text-2xl font-black tracking-tighter font-display cursor-pointer" onClick={() => navigate('/')}>
+          PULSE <span className="text-zinc-500 font-extralight text-lg sm:text-xl">GAMING</span>
         </h1>
         <div className="flex items-center gap-4 sm:gap-6 overflow-x-auto w-full sm:w-auto justify-center sm:justify-end py-2 sm:py-0">
-          <button 
-            onClick={() => setView('game')}
-            className={`font-bold text-[10px] sm:text-sm tracking-widest uppercase transition-colors whitespace-nowrap ${view === 'game' ? 'text-accent' : 'text-zinc-500 hover:text-zinc-300'}`}
-          >
-            Game
-          </button>
-          <button 
-            onClick={() => setView('leaderboard')}
-            className={`font-bold text-[10px] sm:text-sm tracking-widest uppercase transition-colors whitespace-nowrap ${view === 'leaderboard' ? 'text-accent' : 'text-zinc-500 hover:text-zinc-300'}`}
-          >
+          <NavLink to="/" end className={navLinkClass}>
+            Games
+          </NavLink>
+          <NavLink to="/leaderboard" className={navLinkClass}>
             Leaderboard
-          </button>
+          </NavLink>
           {userData?.is_admin && (
-            <button 
-              onClick={() => setView('admin')}
-              className={`font-bold text-[10px] sm:text-sm tracking-widest uppercase transition-colors whitespace-nowrap ${view === 'admin' ? 'text-accent shadow-[0_0_15px_rgba(139,92,246,0.3)]' : 'text-zinc-500 hover:text-zinc-300'}`}
-            >
+            <NavLink to="/admin" className={navLinkClass}>
               Admin
-            </button>
+            </NavLink>
           )}
           <div className="hidden sm:block h-4 w-[1px] bg-zinc-800" />
           <button 
-            onClick={() => { logout(); setUser(null); setUserData(null); setHasEnteredGame(false); }}
+            onClick={handleLogout}
             className="text-zinc-600 hover:text-red-400 text-[10px] sm:text-xs font-bold uppercase tracking-tighter transition-colors whitespace-nowrap"
           >
             Logout
@@ -277,12 +230,12 @@ function App() {
       </header>
 
       <main className="w-full">
-        {renderView()}
+        <Outlet />
       </main>
 
-        {user && userData && !userData.nickname && (
-          <NicknamePrompt onComplete={fetchUserData} />
-        )}
+      {user && userData && !userData.nickname && (
+        <NicknamePrompt onComplete={fetchUserData} />
+      )}
     </div>
   );
 }
