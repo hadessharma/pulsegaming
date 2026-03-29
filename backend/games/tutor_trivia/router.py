@@ -48,6 +48,14 @@ def _build_state_response(state: models.TutorTriviaState) -> dict:
         wrong_count = wrong.get(str(t_id), 0)
         total_score += max(0, 100 - 25 * wrong_count)
 
+    # For completion screen: list of all tutors and their facts
+    tutor_details = None
+    if state.completed:
+        tutor_details = [
+            {"id": t["id"], "name": t["name"], "facts": t["facts"]}
+            for t in day_tutors
+        ]
+
     return {
         "day": state.day,
         "names": names,
@@ -58,6 +66,7 @@ def _build_state_response(state: models.TutorTriviaState) -> dict:
         "total_score": total_score,
         "max_score": len(order) * 100,
         "completed": state.completed,
+        "tutor_details": tutor_details,
     }
 
 def _get_current_global_day(db: Session) -> int:

@@ -147,13 +147,13 @@ const CorrectGuessCard = ({ tutorName, pointsEarned, onNext, isLast }) => (
   </motion.div>
 );
 
-const GameCompleteCard = ({ totalScore, maxScore, tutorCount, isRanked }) => {
+const GameCompleteCard = ({ totalScore, maxScore, tutorCount, isRanked, tutorDetails }) => {
   const pct = maxScore > 0 ? Math.round((totalScore / maxScore) * 100) : 0;
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="w-full max-w-md mx-auto glass-panel relative overflow-hidden text-center"
+      className="w-full max-w-xl mx-auto glass-panel relative overflow-hidden text-center"
     >
       <div className="absolute top-0 left-0 w-full h-1 premium-gradient" />
 
@@ -183,9 +183,48 @@ const GameCompleteCard = ({ totalScore, maxScore, tutorCount, isRanked }) => {
         </div>
       </div>
 
-      <p className={`text-xs uppercase tracking-widest font-bold ${isRanked ? 'text-zinc-600' : 'text-zinc-700'}`}>
+      <p className={`text-xs uppercase tracking-widest font-bold mb-12 ${isRanked ? 'text-zinc-600' : 'text-zinc-700'}`}>
         {isRanked ? 'Score recorded to leaderboard' : 'Practice round — Score not recorded'}
       </p>
+
+      {/* Tutor Details Section */}
+      {tutorDetails && (
+        <div className="text-left space-y-6">
+          <div className="flex items-center gap-3">
+            <div className="h-px flex-1 bg-gradient-to-r from-transparent to-white/10" />
+            <h3 className="text-sm font-black text-zinc-400 uppercase tracking-[0.3em] flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-accent" />
+              Tutor Meet & Greet
+            </h3>
+            <div className="h-px flex-1 bg-gradient-to-l from-transparent to-white/10" />
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-1">
+            {tutorDetails.map((t) => (
+              <motion.div 
+                key={t.id}
+                initial={{ opacity: 0, x: -10 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                className="p-5 rounded-2xl bg-zinc-900/40 border border-white/5 hover:border-accent/20 transition-all group"
+              >
+                <p className="text-accent text-base font-black uppercase tracking-wider mb-4 flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
+                  {t.name}
+                </p>
+                <ul className="space-y-3">
+                  {t.facts.map((fact, i) => (
+                    <li key={i} className="flex items-start gap-3 text-[13px] text-zinc-400 leading-relaxed font-medium">
+                      <Star className="w-4 h-4 text-amber-500/40 mt-0.5 shrink-0 group-hover:text-amber-500/80 transition-colors" />
+                      {fact}
+                    </li>
+                  ))}
+                </ul>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      )}
     </motion.div>
   );
 };
@@ -280,6 +319,7 @@ const TutorTriviaGame = ({ currentDay }) => {
     max_score: maxScore,
     completed,
     global_current_day,
+    tutor_details: tutorDetails,
   } = gameState;
 
   const isRanked = currentDay === global_current_day;
@@ -292,6 +332,7 @@ const TutorTriviaGame = ({ currentDay }) => {
         maxScore={maxScore}
         tutorCount={totalTutors}
         isRanked={isRanked}
+        tutorDetails={tutorDetails}
       />
     );
   }

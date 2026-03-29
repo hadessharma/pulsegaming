@@ -4,14 +4,13 @@ import { motion } from 'framer-motion';
 import { Gamepad2, Trophy, Users } from 'lucide-react';
 
 const FILTERS = [
-  { key: null, label: 'All Games', icon: Trophy },
   { key: 'wordle', label: 'Wordle', icon: Gamepad2 },
   { key: 'tutor_trivia', label: 'Tutor Trivia', icon: Users },
 ];
 
 const Leaderboard = () => {
   const [stats, setStats] = useState([]);
-  const [activeFilter, setActiveFilter] = useState(null);
+  const [activeFilter, setActiveFilter] = useState('wordle');
 
   const fetchLeaderboard = async (gameType) => {
     try {
@@ -60,8 +59,8 @@ const Leaderboard = () => {
               <th className="p-5">#</th>
               <th className="p-5">Competitor</th>
               <th className="p-5 text-center">Sessions</th>
-              <th className="p-5 text-center">
-                {activeFilter ? `${activeFilter} Score` : 'Total Pulse Score'}
+              <th className="p-5 text-center uppercase tracking-widest">
+                {activeFilter.replace('_', ' ')} Score
               </th>
             </tr>
           </thead>

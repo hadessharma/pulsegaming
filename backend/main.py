@@ -184,7 +184,7 @@ class WhitelistEmailResponse(BaseModel):
 
 
 @app.get("/leaderboard")
-async def get_leaderboard(game_type: Optional[str] = None, db: Session = Depends(database.get_db)):
+async def get_leaderboard(game_type: Optional[str] = 'wordle', db: Session = Depends(database.get_db)):
     # Sum scores from history per user, optionally filtered by game_type
     from sqlalchemy import func
 
