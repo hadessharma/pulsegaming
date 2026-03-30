@@ -4,9 +4,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Shield, UserPlus, Trash2, Mail, CheckCircle2, Gamepad2, PlayCircle, StopCircle, Users as UsersIcon, Calendar, ArrowRightCircle } from 'lucide-react';
 
 const AdminPanel = () => {
-  const [activeTab, setActiveTab] = useState('users'); // 'users', 'wordle', 'tutor-trivia'
+  const [activeTab, setActiveTab] = useState('tutor-trivia'); // 'tutor-trivia', 'wordle', 'users'
   const [whitelist, setWhitelist] = useState([]);
   const [config, setConfig] = useState(null);
+  const [wordleSchedule, setWordleSchedule] = useState([]);
+  const [selectedWordleDay, setSelectedWordleDay] = useState(1);
   const [newEmail, setNewEmail] = useState('');
   const [newWord, setNewWord] = useState('');
   const [newHint, setNewHint] = useState('');
@@ -15,11 +17,20 @@ const AdminPanel = () => {
 
   useEffect(() => {
     const init = async () => {
-      await Promise.all([fetchWhitelist(), fetchConfig()]);
+      await Promise.all([fetchWhitelist(), fetchConfig(), fetchWordleSchedule()]);
       setLoading(false);
     };
     init();
   }, []);
+
+  const fetchWordleSchedule = async () => {
+    try {
+      const data = await api.getWordleSchedule();
+      setWordleSchedule(data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const fetchWhitelist = async () => {
     try {
@@ -75,13 +86,24 @@ const AdminPanel = () => {
       return;
     }
     try {
-      await api.setGame(newWord, newHint);
+      await api.setWordleSchedule(selectedWordleDay, newWord, newHint);
       setNewWord('');
       setNewHint('');
-      showStatus(`Game launched: ${newWord.toUpperCase()}`);
+      showStatus(`Day ${selectedWordleDay} updated: ${newWord.toUpperCase()}`);
+      fetchWordleSchedule();
       fetchConfig();
     } catch (err) {
-      showStatus('Failed to set game word.', 'error');
+      showStatus('Failed to update scheduled word.', 'error');
+    }
+  };
+
+  const handleSetActiveWordleDay = async (day) => {
+    try {
+      await api.setWordleActiveDay(day);
+      showStatus(`Wordle Active Day set to: ${day}`);
+      fetchConfig();
+    } catch (err) {
+      showStatus('Failed to set active day.', 'error');
     }
   };
 
@@ -147,9 +169,9 @@ const AdminPanel = () => {
       {/* Tabs */}
       <div className="flex gap-2 p-1 bg-zinc-900/50 rounded-2xl border border-white/5 backdrop-blur-sm">
         {[
-          { id: 'users', label: 'Users', icon: UsersIcon },
-          { id: 'wordle', label: 'Wordle', icon: Gamepad2 },
           { id: 'tutor-trivia', label: 'Tutor Trivia', icon: Calendar },
+          { id: 'wordle', label: 'Wordle', icon: Gamepad2 },
+          { id: 'users', label: 'Users', icon: UsersIcon },
         ].map((tab) => (
           <button
             key={tab.id}
@@ -241,29 +263,79 @@ const AdminPanel = () => {
                   )}
                 </div>
                 
-                <div className="flex flex-col gap-4">
-                  <form onSubmit={handleSetGame} className="flex flex-col sm:flex-row gap-2">
-                    <input
-                      type="text"
-                      maxLength={5}
-                      placeholder="SET 5-LETTER WORD"
-                      className="flex-1 p-4 rounded-xl bg-zinc-950/50 border border-border focus:border-accent outline-none text-center font-black tracking-[0.5em] text-xl transition-all uppercase"
-                      value={newWord}
-                      onChange={(e) => setNewWord(e.target.value.replace(/[^a-zA-Z]/g, ''))}
-                    />
-                    <textarea
-                      placeholder="OPTIONAL GAME HINT"
-                      className="flex-1 p-4 rounded-xl bg-zinc-950/50 border border-border focus:border-accent outline-none text-sm transition-all resize-none h-14"
-                      value={newHint}
-                      onChange={(e) => setNewHint(e.target.value)}
-                    />
-                    <button className="premium-gradient py-4 sm:py-0 px-6 rounded-xl font-bold flex items-center justify-center gap-2 hover:shadow-glow transition-all active:scale-[0.98]">
-                      <PlayCircle className="w-5 h-5" />
-                      LAUNCH
-                    </button>
-                  </form>
+                <div className="flex flex-col gap-6">
+                  {/* Day Selector */}
+                  <div className="space-y-3">
+                    <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest pl-1">Select Day to Configure (1-7)</label>
+                    <div className="flex flex-wrap gap-2">
+                      {[1, 2, 3, 4, 5, 6, 7].map((day) => {
+                        const scheduled = wordleSchedule.find(s => s.day === day);
+                        const isActive = config?.wordle_day === day;
+                        return (
+                          <div key={day} className="flex flex-col gap-1">
+                            <button
+                              onClick={() => setSelectedWordleDay(day)}
+                              className={`w-12 h-12 rounded-xl font-black flex items-center justify-center transition-all border relative ${
+                                selectedWordleDay === day
+                                  ? 'bg-zinc-800 border-accent text-white shadow-glow'
+                                  : 'bg-zinc-950/40 border-white/5 text-zinc-500 hover:border-white/20'
+                              }`}
+                            >
+                              {day}
+                              {scheduled && <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-zinc-900" title="Word Scheduled" />}
+                              {isActive && <div className="absolute -bottom-1 -right-1 w-2.5 h-2.5 bg-accent rounded-full border-2 border-zinc-900" title="Active Day" />}
+                            </button>
+                            {selectedWordleDay === day && (
+                              <button 
+                                onClick={() => handleSetActiveWordleDay(day)}
+                                className={`text-[10px] font-black uppercase tracking-tighter py-1 rounded-md transition-all ${
+                                  isActive ? 'text-zinc-600 cursor-default' : 'text-accent hover:bg-accent/10'
+                                }`}
+                                disabled={isActive}
+                              >
+                                {isActive ? 'ACTIVE' : 'ACTIVATE'}
+                              </button>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Config Form */}
+                  <div className="p-6 rounded-2xl bg-zinc-950/30 border border-white/5 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-bold text-sm text-zinc-400 uppercase tracking-tight">Configuring Day {selectedWordleDay}</h4>
+                      {wordleSchedule.find(s => s.day === selectedWordleDay) && (
+                        <div className="text-[10px] font-black text-emerald-500 uppercase px-2 py-0.5 rounded-md bg-emerald-500/10 border border-emerald-500/10">
+                          WORD: {wordleSchedule.find(s => s.day === selectedWordleDay).word}
+                        </div>
+                      )}
+                    </div>
+                    
+                    <form onSubmit={handleSetGame} className="flex flex-col sm:flex-row gap-2">
+                      <input
+                        type="text"
+                        maxLength={5}
+                        placeholder={wordleSchedule.find(s => s.day === selectedWordleDay)?.word || "SET 5-LETTER WORD"}
+                        className="flex-1 p-4 rounded-xl bg-zinc-950 border border-border focus:border-accent outline-none text-center font-black tracking-[0.5em] text-xl transition-all uppercase"
+                        value={newWord}
+                        onChange={(e) => setNewWord(e.target.value.replace(/[^a-zA-Z]/g, ''))}
+                      />
+                      <textarea
+                        placeholder={wordleSchedule.find(s => s.day === selectedWordleDay)?.hint || "OPTIONAL GAME HINT"}
+                        className="flex-1 p-4 rounded-xl bg-zinc-950 border border-border focus:border-accent outline-none text-sm transition-all resize-none h-14"
+                        value={newHint}
+                        onChange={(e) => setNewHint(e.target.value)}
+                      />
+                      <button className="premium-gradient py-4 sm:py-0 px-6 rounded-xl font-bold flex items-center justify-center gap-2 hover:shadow-glow transition-all active:scale-[0.98]">
+                        <CheckCircle2 className="w-5 h-5" />
+                        SAVE
+                      </button>
+                    </form>
+                  </div>
                   
-                  <div className="flex flex-col sm:flex-row gap-3">
+                  <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-white/5">
                     <button 
                       onClick={handleStopGame}
                       className="flex-1 px-6 py-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 font-bold flex items-center justify-center gap-2 hover:bg-red-500/20 transition-all active:scale-[0.98]"

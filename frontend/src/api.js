@@ -107,3 +107,18 @@ export const incrementTutorDay = async () => {
   const response = await api.post('/admin/game/tutor-trivia/next-day');
   return response.data;
 };
+
+export const getWordleSchedule = async () => {
+  const response = await api.get('/admin/wordle/schedule');
+  return response.data;
+};
+
+export const setWordleSchedule = async (day, word, hint) => {
+  const response = await api.post('/admin/wordle/schedule', { day, word, hint });
+  return response.data;
+};
+
+export const setWordleActiveDay = async (day) => {
+  const response = await api.post('/admin/wordle/active-day', { day });
+  return response.data;
+};

@@ -57,6 +57,11 @@ async def get_state(
     if not config or not config.is_active:
         raise HTTPException(status_code=404, detail="No active game at the moment.")
 
+    # Fetch scheduled word for the active day
+    scheduled = db.query(models.WordleWord).filter(models.WordleWord.day == config.wordle_day).first()
+    active_word = (scheduled.word if scheduled else "PULSE").upper()
+    active_hint = scheduled.hint if scheduled else "No hint available."
+
     state = (
         db.query(models.GameState)
         .filter(models.GameState.user_id == current_user.id)
@@ -64,15 +69,15 @@ async def get_state(
     )
     if not state:
         state = models.GameState(
-            user_id=current_user.id, word_of_the_day=config.word_of_the_day
+            user_id=current_user.id, word_of_the_day=active_word
         )
         db.add(state)
         db.commit()
         db.refresh(state)
 
-    # Ensure user has the current word if the admin changed it
-    if state.word_of_the_day != config.word_of_the_day:
-        state.word_of_the_day = config.word_of_the_day
+    # Ensure user has the current word if the admin changed it or advanced the day
+    if state.word_of_the_day != active_word:
+        state.word_of_the_day = active_word
         state.guesses = []
         state.hints_used = 0
         state.completed = False
@@ -86,7 +91,7 @@ async def get_state(
         score = 1000 + (6 - len(guesses)) * 100
         score = max(score, 500)
 
-    current_word = state.word_of_the_day or config.word_of_the_day or "PULSE"
+    current_word = state.word_of_the_day or active_word
 
     return {
         "guesses": guesses,
@@ -95,7 +100,7 @@ async def get_state(
         "completed": state.completed,
         "won": state.won,
         "word_of_the_day": current_word if state.completed else None,
-        "hint": getattr(config, "hint", None),
+        "hint": active_hint,
         "current_score": score,
     }
 
@@ -177,7 +182,14 @@ async def get_hint(
         .filter(models.GameState.user_id == current_user.id)
         .first()
     )
+    if not state:
+         raise HTTPException(status_code=404, detail="No game state found.")
+         
     if state.completed:
         raise HTTPException(status_code=400, detail="Game already completed")
 
-    return {"hint": config.hint}
+    # Fetch scheduled word/hint for the active day
+    scheduled = db.query(models.WordleWord).filter(models.WordleWord.day == config.wordle_day).first()
+    active_hint = scheduled.hint if scheduled else "No hint available."
+
+    return {"hint": active_hint}

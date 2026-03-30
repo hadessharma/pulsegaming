@@ -21,14 +21,6 @@ const HomePage = () => {
 
       <div className="grid gap-4 sm:gap-5">
         <GameCard
-          title="Wordle"
-          description="Guess the 5-letter word in 6 tries. Earn points for speed and accuracy."
-          icon={Gamepad2}
-          route="/wordle"
-          accentColor="accent"
-        />
-        
-        <GameCard
           title="Tutor Trivia"
           description="Match facts to tutors. 100 points per correct guess, −25 for each miss."
           icon={Users}
@@ -36,7 +28,13 @@ const HomePage = () => {
           accentColor="accent"
         />
 
-
+        <GameCard
+          title="Wordle"
+          description="Guess the 5-letter word in 6 tries. Earn points for speed and accuracy."
+          icon={Gamepad2}
+          route="/wordle"
+          accentColor="accent"
+        />
       </div>
     </div>
   );

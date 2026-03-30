@@ -105,6 +105,20 @@ def ensure_game_config_tutor_trivia_day_column() -> None:
     except Exception as e:
         print(f"Warning: could not ensure `game_config.tutor_trivia_day` column: {e}")
 
+def ensure_game_config_wordle_day_column() -> None:
+    try:
+        inspector = inspect(engine)
+        if "game_config" not in inspector.get_table_names():
+            return
+        columns = {c["name"] for c in inspector.get_columns("game_config")}
+        if "wordle_day" in columns:
+            return
+        with engine.begin() as conn:
+            conn.execute(text("ALTER TABLE game_config ADD COLUMN wordle_day INTEGER DEFAULT 1"))
+        print("Added missing `game_config.wordle_day` column.")
+    except Exception as e:
+        print(f"Warning: could not ensure `game_config.wordle_day` column: {e}")
+
 def ensure_game_history_is_ranked_column() -> None:
     try:
         inspector = inspect(engine)
@@ -133,6 +147,7 @@ async def startup_event():
         ensure_game_config_hint_column()
         ensure_game_history_game_type_column()
         ensure_game_config_tutor_trivia_day_column()
+        ensure_game_config_wordle_day_column()
         ensure_game_history_is_ranked_column()
         
         # Seed whitelist if empty
@@ -181,6 +196,11 @@ class WhitelistEmailResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+class WordleScheduleRequest(BaseModel):
+    day: int
+    word: str
+    hint: Optional[str] = None
 
 
 @app.get("/leaderboard")
@@ -305,6 +325,43 @@ async def update_tutor_trivia_config(data: dict, db: Session = Depends(database.
     
     db.commit()
     return {"status": "updated", "tutor_trivia_day": day}
+
+@app.get("/admin/wordle/schedule")
+async def get_wordle_schedule(db: Session = Depends(database.get_db), admin: models.User = Depends(auth.admin_required)):
+    return db.query(models.WordleWord).order_by(models.WordleWord.day).all()
+
+@app.post("/admin/wordle/schedule")
+async def set_wordle_scheduled_word(data: WordleScheduleRequest, db: Session = Depends(database.get_db), admin: models.User = Depends(auth.admin_required)):
+    word = data.word.upper().strip()
+    if len(word) != 5:
+        raise HTTPException(status_code=400, detail="Word must be 5 letters")
+    
+    existing = db.query(models.WordleWord).filter(models.WordleWord.day == data.day).first()
+    if existing:
+        existing.word = word
+        existing.hint = data.hint
+    else:
+        new_word = models.WordleWord(day=data.day, word=word, hint=data.hint)
+        db.add(new_word)
+    
+    db.commit()
+    return {"status": "scheduled", "day": data.day, "word": word}
+
+@app.post("/admin/wordle/active-day")
+async def set_wordle_active_day(data: dict, db: Session = Depends(database.get_db), admin: models.User = Depends(auth.admin_required)):
+    day = data.get("day")
+    if day is None:
+        raise HTTPException(status_code=400, detail="Day is required")
+    
+    config = db.query(models.GameConfig).first()
+    if not config:
+        config = models.GameConfig(wordle_day=day, is_active=True)
+        db.add(config)
+    else:
+        config.wordle_day = day
+    
+    db.commit()
+    return {"status": "updated", "wordle_day": day}
 
 @app.post("/admin/game/tutor-trivia/next-day")
 async def next_tutor_trivia_day(db: Session = Depends(database.get_db), admin: models.User = Depends(auth.admin_required)):

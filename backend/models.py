@@ -36,10 +36,19 @@ class GameConfig(Base):
     __tablename__ = "game_config"
 
     id = Column(Integer, primary_key=True, index=True)
-    word_of_the_day = Column(String)
-    hint = Column(String, nullable=True)
+    word_of_the_day = Column(String) # Deprecated, use wordle_day
+    hint = Column(String, nullable=True) # Deprecated
     tutor_trivia_day = Column(Integer, default=1)
+    wordle_day = Column(Integer, default=1)
     is_active = Column(Boolean, default=True)
+
+class WordleWord(Base):
+    __tablename__ = "wordle_words"
+
+    id = Column(Integer, primary_key=True, index=True)
+    day = Column(Integer, unique=True, index=True)
+    word = Column(String(5))
+    hint = Column(String, nullable=True)
 
 class GameHistory(Base):
     __tablename__ = "game_history"

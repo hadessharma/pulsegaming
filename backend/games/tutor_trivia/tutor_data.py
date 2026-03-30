@@ -1,4 +1,4 @@
-# Tutor Trivia game data — server-side only.
+# Tutor Trivia game data, server-side only.
 # Replace the placeholder tutors below with your actual dataset.
 # Each tutor needs: id, name, facts (list of 3), combined_facts (string), day (1-5)
 
@@ -132,7 +132,7 @@ TUTORS = [
             "I watched 68 anime. I am also a big movie buff.",
             "I can squat 100 kg."
         ],
-        "combinedFacts": "I love hiking — my hikes have taken me through all kinds of terrains: deserts, snow-covered trails, and canyons where I had to swim to get across. It's wild how every landscape feels like a whole new world. I have watched 68 anime and am also a big movie buff. I can squat 100 kg.",
+        "combinedFacts": "I love hiking, my hikes have taken me through all kinds of terrains: deserts, snow-covered trails, and canyons where I had to swim to get across. It's wild how every landscape feels like a whole new world. I have watched 68 anime and am also a big movie buff. I can squat 100 kg.",
         "day": 3
     },
     {
@@ -143,7 +143,7 @@ TUTORS = [
             "I've won multiple hackathons, so one of my favourite things is turning chaotic ideas into real working products under pressure.",
             "I was a state volleyball and district basketball player"
         ],
-        "combinedFacts": "I take my coffee seriously — I genuinely enjoy trying different brews and could probably talk way too long about a solid cup. I've won multiple hackathons, and one of my favorite things is turning chaotic ideas into real working products under pressure. I was a state volleyball and district basketball player.",
+        "combinedFacts": "I take my coffee seriously, I genuinely enjoy trying different brews and could probably talk way too long about a solid cup. I've won multiple hackathons, and one of my favorite things is turning chaotic ideas into real working products under pressure. I was a state volleyball and district basketball player.",
         "day": 3
     },
     {
@@ -209,7 +209,7 @@ TUTORS = [
             "Travel Story: Had flight from Fairbanks, Alaska delayed for ~7 hours and then cancelled because some plane components froze over. Flight was at midnight and it was ~-40 F",
             "Travel Story: Went camping with friends. We the night before we planned on returning since the ground was too rocky to sleep on."
         ],
-        "combinedFacts": "My hobby is photography, specifically astrophotography. I once had a flight from Fairbanks, Alaska delayed for about 7 hours and then cancelled because some plane components froze over — the flight was at midnight and it was around -40°F. I also went camping with friends, but we decided the night before we planned on returning since the ground was too rocky to sleep on.",
+        "combinedFacts": "My hobby is photography, specifically astrophotography. I once had a flight from Fairbanks, Alaska delayed for about 7 hours and then cancelled because some plane components froze over, the flight was at midnight and it was around -40°F. I also went camping with friends, but we decided the night before we planned on returning since the ground was too rocky to sleep on.",
         "day": 5
     },
     {
@@ -220,7 +220,7 @@ TUTORS = [
             "I love showering a lot. I shower twice a day.",
             "I am on a quest to find the best pizza in Tempe/Phoenix."
         ],
-        "combinedFacts": "I love listening to music so much that I am one of the top listeners on Spotify. I love showering — I shower twice a day. I am on a quest to find the best pizza in Tempe/Phoenix.",
+        "combinedFacts": "I love listening to music so much that I am one of the top listeners on Spotify. I love showering, I shower twice a day. I am on a quest to find the best pizza in Tempe/Phoenix.",
         "day": 5
     },
     {
