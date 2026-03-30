@@ -161,6 +161,11 @@ async def startup_event():
         db.close()
 
 
+@app.get("/")
+async def read_root():
+    return {"status": "online", "message": "PulseGaming API is healthy"}
+
+
 # ── Mount game sub-routers ──────────────────────────────────────────
 app.include_router(wordle_router)
 app.include_router(tutor_trivia_router)
