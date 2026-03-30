@@ -4,13 +4,13 @@ import { motion } from 'framer-motion';
 import { Gamepad2, Trophy, Users } from 'lucide-react';
 
 const FILTERS = [
-  { key: 'wordle', label: 'Wordle', icon: Gamepad2 },
+  // { key: 'wordle', label: 'Wordle', icon: Gamepad2 },
   { key: 'tutor_trivia', label: 'Tutor Trivia', icon: Users },
 ];
 
 const Leaderboard = () => {
   const [stats, setStats] = useState([]);
-  const [activeFilter, setActiveFilter] = useState('wordle');
+  const [activeFilter, setActiveFilter] = useState('tutor_trivia');
 
   const fetchLeaderboard = async (gameType) => {
     try {

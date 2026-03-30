@@ -15,7 +15,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
       <Routes>
         <Route path="/" element={<App />}>
           <Route index element={<HomePage />} />
-          <Route path="wordle" element={<WordlePage />} />
+{/* <Route path="wordle" element={<WordlePage />} /> */}
           <Route path="tutor-trivia" element={<TutorTriviaPage />} />
           <Route path="leaderboard" element={<LeaderboardPage />} />
           <Route path="admin" element={<AdminPage />} />

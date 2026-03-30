@@ -170,7 +170,7 @@ const AdminPanel = () => {
       <div className="flex gap-2 p-1 bg-zinc-900/50 rounded-2xl border border-white/5 backdrop-blur-sm">
         {[
           { id: 'tutor-trivia', label: 'Tutor Trivia', icon: Calendar },
-          { id: 'wordle', label: 'Wordle', icon: Gamepad2 },
+          // { id: 'wordle', label: 'Wordle', icon: Gamepad2 },
           { id: 'users', label: 'Users', icon: UsersIcon },
         ].map((tab) => (
           <button

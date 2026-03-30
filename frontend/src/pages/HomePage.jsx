@@ -28,13 +28,13 @@ const HomePage = () => {
           accentColor="accent"
         />
 
-        <GameCard
+{/* <GameCard
           title="Wordle"
           description="Guess the 5-letter word in 6 tries. Earn points for speed and accuracy."
           icon={Gamepad2}
           route="/wordle"
           accentColor="accent"
-        />
+        /> */}
       </div>
     </div>
   );

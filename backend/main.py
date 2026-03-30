@@ -10,7 +10,7 @@ from pydantic import BaseModel, EmailStr
 
 import models, database, auth
 from database import engine
-from games.wordle.router import router as wordle_router
+# from games.wordle.router import router as wordle_router
 from games.tutor_trivia.router import router as tutor_trivia_router
 
 
@@ -167,22 +167,21 @@ async def read_root():
 
 
 # ── Mount game sub-routers ──────────────────────────────────────────
-app.include_router(wordle_router)
+# app.include_router(wordle_router)
 app.include_router(tutor_trivia_router)
 
 
-# ── Backward-compatibility redirects (old flat routes → /wordle/*) ──
-@app.get("/state")
-async def legacy_state():
-    return RedirectResponse(url="/wordle/state", status_code=307)
-
-@app.post("/guess")
-async def legacy_guess():
-    return RedirectResponse(url="/wordle/guess", status_code=307)
-
-@app.post("/hint")
-async def legacy_hint():
-    return RedirectResponse(url="/wordle/hint", status_code=307)
+# @app.get("/state")
+# async def legacy_state():
+#     return RedirectResponse(url="/wordle/state", status_code=307)
+# 
+# @app.post("/guess")
+# async def legacy_guess():
+#     return RedirectResponse(url="/wordle/guess", status_code=307)
+# 
+# @app.post("/hint")
+# async def legacy_hint():
+#     return RedirectResponse(url="/wordle/hint", status_code=307)
 
 
 # ── Shared routes (users, leaderboard, admin) ──────────────────────
@@ -209,7 +208,7 @@ class WordleScheduleRequest(BaseModel):
 
 
 @app.get("/leaderboard")
-async def get_leaderboard(game_type: Optional[str] = 'wordle', db: Session = Depends(database.get_db)):
+async def get_leaderboard(game_type: Optional[str] = 'tutor_trivia', db: Session = Depends(database.get_db)):
     # Sum scores from history per user, optionally filtered by game_type
     from sqlalchemy import func
 
@@ -331,42 +330,42 @@ async def update_tutor_trivia_config(data: dict, db: Session = Depends(database.
     db.commit()
     return {"status": "updated", "tutor_trivia_day": day}
 
-@app.get("/admin/wordle/schedule")
-async def get_wordle_schedule(db: Session = Depends(database.get_db), admin: models.User = Depends(auth.admin_required)):
-    return db.query(models.WordleWord).order_by(models.WordleWord.day).all()
-
-@app.post("/admin/wordle/schedule")
-async def set_wordle_scheduled_word(data: WordleScheduleRequest, db: Session = Depends(database.get_db), admin: models.User = Depends(auth.admin_required)):
-    word = data.word.upper().strip()
-    if len(word) != 5:
-        raise HTTPException(status_code=400, detail="Word must be 5 letters")
-    
-    existing = db.query(models.WordleWord).filter(models.WordleWord.day == data.day).first()
-    if existing:
-        existing.word = word
-        existing.hint = data.hint
-    else:
-        new_word = models.WordleWord(day=data.day, word=word, hint=data.hint)
-        db.add(new_word)
-    
-    db.commit()
-    return {"status": "scheduled", "day": data.day, "word": word}
-
-@app.post("/admin/wordle/active-day")
-async def set_wordle_active_day(data: dict, db: Session = Depends(database.get_db), admin: models.User = Depends(auth.admin_required)):
-    day = data.get("day")
-    if day is None:
-        raise HTTPException(status_code=400, detail="Day is required")
-    
-    config = db.query(models.GameConfig).first()
-    if not config:
-        config = models.GameConfig(wordle_day=day, is_active=True)
-        db.add(config)
-    else:
-        config.wordle_day = day
-    
-    db.commit()
-    return {"status": "updated", "wordle_day": day}
+# @app.get("/admin/wordle/schedule")
+# async def get_wordle_schedule(db: Session = Depends(database.get_db)), admin: models.User = Depends(auth.admin_required)):
+#     return db.query(models.WordleWord).order_by(models.WordleWord.day).all()
+# 
+# @app.post("/admin/wordle/schedule")
+# async def set_wordle_scheduled_word(data: WordleScheduleRequest, db: Session = Depends(database.get_db)), admin: models.User = Depends(auth.admin_required)):
+#     word = data.word.upper().strip()
+#     if len(word) != 5:
+#         raise HTTPException(status_code=400, detail="Word must be 5 letters")
+#     
+#     existing = db.query(models.WordleWord).filter(models.WordleWord.day == data.day).first()
+#     if existing:
+#         existing.word = word
+#         existing.hint = data.hint
+#     else:
+#         new_word = models.WordleWord(day=data.day, word=word, hint=data.hint)
+#         db.add(new_word)
+#     
+#     db.commit()
+#     return {"status": "scheduled", "day": data.day, "word": word}
+# 
+# @app.post("/admin/wordle/active-day")
+# async def set_wordle_active_day(data: dict, db: Session = Depends(database.get_db)), admin: models.User = Depends(auth.admin_required)):
+#     day = data.get("day")
+#     if day is None:
+#         raise HTTPException(status_code=400, detail="Day is required")
+#     
+#     config = db.query(models.GameConfig).first()
+#     if not config:
+#         config = models.GameConfig(wordle_day=day, is_active=True)
+#         db.add(config)
+#     else:
+#         config.wordle_day = day
+#     
+#     db.commit()
+#     return {"status": "updated", "wordle_day": day}
 
 @app.post("/admin/game/tutor-trivia/next-day")
 async def next_tutor_trivia_day(db: Session = Depends(database.get_db), admin: models.User = Depends(auth.admin_required)):
