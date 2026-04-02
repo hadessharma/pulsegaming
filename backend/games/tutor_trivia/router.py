@@ -28,8 +28,9 @@ def _build_state_response(state: models.TutorTriviaState) -> dict:
     order = state.tutor_order or []
     wrong = state.wrong_guesses if isinstance(state.wrong_guesses, dict) else {}
 
-    # Names list — in the shuffled order so the UI can render buttons
+    # Names list — sorted alphabetically so the UI is stable but doesn't reveal the target order
     names = [{"id": t_id, "name": tutor_map[t_id]["name"]} for t_id in order if t_id in tutor_map]
+    names.sort(key=lambda x: x["name"])
 
     # Which tutors have already been correctly guessed
     guessed_ids = order[: state.current_index]
