@@ -151,6 +151,27 @@ def ensure_game_history_is_ranked_column() -> None:
     except Exception as e:
         print(f"Warning: could not ensure `game_history.is_ranked` column: {e}")
 
+def ensure_logic_sprint_state_columns() -> None:
+    try:
+        inspector = inspect(engine)
+        if "logic_sprint_states" not in inspector.get_table_names():
+            return
+        columns = {c["name"] for c in inspector.get_columns("logic_sprint_states")}
+        dialect = engine.dialect.name
+        
+        with engine.begin() as conn:
+            if "day" not in columns:
+                conn.execute(text("ALTER TABLE logic_sprint_states ADD COLUMN day INTEGER DEFAULT 1"))
+                print("Added `logic_sprint_states.day` column.")
+            if "set_number" not in columns:
+                conn.execute(text("ALTER TABLE logic_sprint_states ADD COLUMN set_number INTEGER DEFAULT 1"))
+                print("Added `logic_sprint_states.set_number` column.")
+            if "current_task_index" not in columns:
+                conn.execute(text("ALTER TABLE logic_sprint_states ADD COLUMN current_task_index INTEGER DEFAULT 0"))
+                print("Added `logic_sprint_states.current_task_index` column.")
+    except Exception as e:
+        print(f"Warning: could not ensure `logic_sprint_states` columns: {e}")
+
 @app.on_event("startup")
 async def startup_event():
     db = database.SessionLocal()
@@ -165,6 +186,7 @@ async def startup_event():
         ensure_game_config_wordle_day_column()
         ensure_game_config_logic_sprint_day_column()
         ensure_game_history_is_ranked_column()
+        ensure_logic_sprint_state_columns()
         
         # Seed whitelist if empty
         if db.query(models.WhitelistedEmail).count() == 0:
