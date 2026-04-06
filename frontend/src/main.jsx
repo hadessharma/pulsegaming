@@ -7,6 +7,7 @@ import LeaderboardPage from './pages/LeaderboardPage.jsx';
 import AdminPage from './pages/AdminPage.jsx';
 import WordlePage from './games/wordle/WordlePage.jsx';
 import TutorTriviaPage from './games/tutor-trivia/TutorTriviaPage.jsx';
+import LogicSprintPage from './games/logic-sprint/LogicSprintPage.jsx';
 import './index.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
@@ -16,7 +17,8 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         <Route path="/" element={<App />}>
           <Route index element={<HomePage />} />
 {/* <Route path="wordle" element={<WordlePage />} /> */}
-          <Route path="tutor-trivia" element={<TutorTriviaPage />} />
+// <Route path="tutor-trivia" element={<TutorTriviaPage />} />
+          <Route path="logic-sprint" element={<LogicSprintPage />} />
           <Route path="leaderboard" element={<LeaderboardPage />} />
           <Route path="admin" element={<AdminPage />} />
         </Route>

@@ -40,6 +40,7 @@ class GameConfig(Base):
     hint = Column(String, nullable=True) # Deprecated
     tutor_trivia_day = Column(Integer, default=1)
     wordle_day = Column(Integer, default=1)
+    logic_sprint_day = Column(Integer, default=1)
     is_active = Column(Boolean, default=True)
 
 class WordleWord(Base):
@@ -83,3 +84,27 @@ class TutorTriviaState(Base):
     completed = Column(Boolean, default=False)
 
     user = relationship("User")
+
+
+class LogicSprintState(Base):
+    __tablename__ = "logic_sprint_states"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    day = Column(Integer, nullable=False, index=True) # Game day (1-5)
+    set_number = Column(Integer, nullable=False)     # Assigned question set (1-5)
+    start_time = Column(DateTime, default=datetime.utcnow)
+    score = Column(Integer, default=0)
+    tasks_solved = Column(Integer, default=0)
+    current_task_index = Column(Integer, default=0)
+    current_task_data = Column(JSON, default={})  # Current task from the set
+    completed = Column(Boolean, default=False)
+
+    user = relationship("User")
+
+class LogicSprintQuestionSet(Base):
+    __tablename__ = "logic_sprint_question_sets"
+
+    id = Column(Integer, primary_key=True, index=True)
+    set_number = Column(Integer, unique=True, index=True)
+    tasks = Column(JSON, nullable=False) # List of generated tasks

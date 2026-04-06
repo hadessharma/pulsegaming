@@ -3,7 +3,7 @@ import { auth } from './firebase';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
-const api = axios.create({
+export const api = axios.create({
   baseURL: API_URL,
 });
 
@@ -120,5 +120,10 @@ export const setWordleSchedule = async (day, word, hint) => {
 
 export const setWordleActiveDay = async (day) => {
   const response = await api.post('/admin/wordle/active-day', { day });
+  return response.data;
+};
+
+export const updateLogicSprintDay = async (day) => {
+  const response = await api.post('/admin/game/logic-sprint', { day });
   return response.data;
 };

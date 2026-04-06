@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Shield, UserPlus, Trash2, Mail, CheckCircle2, Gamepad2, PlayCircle, StopCircle, Users as UsersIcon, Calendar, ArrowRightCircle } from 'lucide-react';
 
 const AdminPanel = () => {
-  const [activeTab, setActiveTab] = useState('tutor-trivia'); // 'tutor-trivia', 'wordle', 'users'
+  const [activeTab, setActiveTab] = useState('users'); // 'users'
   const [whitelist, setWhitelist] = useState([]);
   const [config, setConfig] = useState(null);
   const [wordleSchedule, setWordleSchedule] = useState([]);
@@ -17,7 +17,7 @@ const AdminPanel = () => {
 
   useEffect(() => {
     const init = async () => {
-      await Promise.all([fetchWhitelist(), fetchConfig(), fetchWordleSchedule()]);
+      await Promise.all([fetchWhitelist(), fetchConfig()]);
       setLoading(false);
     };
     init();
@@ -147,6 +147,16 @@ const AdminPanel = () => {
       showStatus('Failed to update Tutor Trivia day.', 'error');
     }
   };
+
+  const handleSetLogicSprintDay = async (day) => {
+    try {
+      await api.updateLogicSprintDay(day);
+      showStatus(`Logic Sprint set to Day ${day}`);
+      fetchConfig();
+    } catch (err) {
+      showStatus('Failed to update Logic Sprint day.', 'error');
+    }
+  };
   
   if (loading) return <div className="p-8 text-center text-zinc-500 font-medium animate-pulse">Accessing Secure Vault...</div>;
   
@@ -169,9 +179,8 @@ const AdminPanel = () => {
       {/* Tabs */}
       <div className="flex gap-2 p-1 bg-zinc-900/50 rounded-2xl border border-white/5 backdrop-blur-sm">
         {[
-          { id: 'tutor-trivia', label: 'Tutor Trivia', icon: Calendar },
-          // { id: 'wordle', label: 'Wordle', icon: Gamepad2 },
           { id: 'users', label: 'Users', icon: UsersIcon },
+          { id: 'games', label: 'Games', icon: Gamepad2 },
         ].map((tab) => (
           <button
             key={tab.id}
@@ -247,156 +256,69 @@ const AdminPanel = () => {
             </div>
           )}
 
-          {activeTab === 'wordle' && (
+          {activeTab === 'games' && (
             <div className="space-y-8">
-              <section className="glass-panel space-y-6">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <Gamepad2 className="w-5 h-5 text-accent" />
-                    <h3 className="font-bold text-lg uppercase tracking-tight text-white">Active Word Control</h3>
-                  </div>
-                  {config?.word_of_the_day && (
-                    <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
-                      <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                      <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Active: {config.word_of_the_day}</span>
-                    </div>
-                  )}
+              {/* Logic Sprint Day Control */}
+              <section className="glass-panel">
+                <div className="flex items-center gap-2 mb-6">
+                  <PlayCircle className="w-5 h-5 text-accent" />
+                  <h3 className="font-bold text-lg uppercase tracking-tight text-white">Logic Sprint Configuration</h3>
                 </div>
-                
-                <div className="flex flex-col gap-6">
-                  {/* Day Selector */}
-                  <div className="space-y-3">
-                    <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest pl-1">Select Day to Configure (1-7)</label>
-                    <div className="flex flex-wrap gap-2">
-                      {[1, 2, 3, 4, 5, 6, 7].map((day) => {
-                        const scheduled = wordleSchedule.find(s => s.day === day);
-                        const isActive = config?.wordle_day === day;
-                        return (
-                          <div key={day} className="flex flex-col gap-1">
-                            <button
-                              onClick={() => setSelectedWordleDay(day)}
-                              className={`w-12 h-12 rounded-xl font-black flex items-center justify-center transition-all border relative ${
-                                selectedWordleDay === day
-                                  ? 'bg-zinc-800 border-accent text-white shadow-glow'
-                                  : 'bg-zinc-950/40 border-white/5 text-zinc-500 hover:border-white/20'
-                              }`}
-                            >
-                              {day}
-                              {scheduled && <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-zinc-900" title="Word Scheduled" />}
-                              {isActive && <div className="absolute -bottom-1 -right-1 w-2.5 h-2.5 bg-accent rounded-full border-2 border-zinc-900" title="Active Day" />}
-                            </button>
-                            {selectedWordleDay === day && (
-                              <button 
-                                onClick={() => handleSetActiveWordleDay(day)}
-                                className={`text-[10px] font-black uppercase tracking-tighter py-1 rounded-md transition-all ${
-                                  isActive ? 'text-zinc-600 cursor-default' : 'text-accent hover:bg-accent/10'
-                                }`}
-                                disabled={isActive}
-                              >
-                                {isActive ? 'ACTIVE' : 'ACTIVATE'}
-                              </button>
-                            )}
-                          </div>
-                        );
-                      })}
+                <div className="space-y-6">
+                  <div>
+                    <label className="text-xs font-black text-zinc-500 uppercase tracking-widest block mb-4">Active Logic Sprint Day (1-5)</label>
+                    <div className="flex gap-2">
+                      {[1, 2, 3, 4, 5].map((day) => (
+                        <button
+                          key={day}
+                          onClick={() => handleSetLogicSprintDay(day)}
+                          className={`flex-1 py-4 rounded-xl font-black transition-all border ${
+                            config?.logic_sprint_day === day
+                              ? 'bg-accent text-white border-accent'
+                              : 'bg-zinc-950/50 text-zinc-500 border-white/5 hover:border-white/10 hover:text-zinc-300'
+                          }`}
+                        >
+                          DAY {day}
+                        </button>
+                      ))}
                     </div>
-                  </div>
-
-                  {/* Config Form */}
-                  <div className="p-6 rounded-2xl bg-zinc-950/30 border border-white/5 space-y-4">
-                    <div className="flex items-center justify-between">
-                      <h4 className="font-bold text-sm text-zinc-400 uppercase tracking-tight">Configuring Day {selectedWordleDay}</h4>
-                      {wordleSchedule.find(s => s.day === selectedWordleDay) && (
-                        <div className="text-[10px] font-black text-emerald-500 uppercase px-2 py-0.5 rounded-md bg-emerald-500/10 border border-emerald-500/10">
-                          WORD: {wordleSchedule.find(s => s.day === selectedWordleDay).word}
-                        </div>
-                      )}
-                    </div>
-                    
-                    <form onSubmit={handleSetGame} className="flex flex-col sm:flex-row gap-2">
-                      <input
-                        type="text"
-                        maxLength={5}
-                        placeholder={wordleSchedule.find(s => s.day === selectedWordleDay)?.word || "SET 5-LETTER WORD"}
-                        className="flex-1 p-4 rounded-xl bg-zinc-950 border border-border focus:border-accent outline-none text-center font-black tracking-[0.5em] text-xl transition-all uppercase"
-                        value={newWord}
-                        onChange={(e) => setNewWord(e.target.value.replace(/[^a-zA-Z]/g, ''))}
-                      />
-                      <textarea
-                        placeholder={wordleSchedule.find(s => s.day === selectedWordleDay)?.hint || "OPTIONAL GAME HINT"}
-                        className="flex-1 p-4 rounded-xl bg-zinc-950 border border-border focus:border-accent outline-none text-sm transition-all resize-none h-14"
-                        value={newHint}
-                        onChange={(e) => setNewHint(e.target.value)}
-                      />
-                      <button className="premium-gradient py-4 sm:py-0 px-6 rounded-xl font-bold flex items-center justify-center gap-2 hover:shadow-glow transition-all active:scale-[0.98]">
-                        <CheckCircle2 className="w-5 h-5" />
-                        SAVE
-                      </button>
-                    </form>
                   </div>
                   
-                  <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-white/5">
-                    <button 
-                      onClick={handleStopGame}
-                      className="flex-1 px-6 py-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 font-bold flex items-center justify-center gap-2 hover:bg-red-500/20 transition-all active:scale-[0.98]"
-                    >
-                      <StopCircle className="w-5 h-5" />
-                      WIPE ARENA
-                    </button>
-                    <button 
-                      onClick={handleResetLeaderboard}
-                      className="flex-1 px-6 py-4 rounded-xl bg-zinc-800/50 border border-white/5 text-zinc-400 font-bold flex items-center justify-center gap-2 hover:bg-zinc-800 transition-all active:scale-[0.98]"
-                    >
-                      <Trash2 className="w-5 h-5" />
-                      RESET LEADERBOARD
-                    </button>
+                  <div className="p-4 bg-zinc-900/50 rounded-xl border border-white/5">
+                    <p className="text-sm text-zinc-400">
+                      <span className="text-accent font-bold">INFO:</span> Advancing the day will limit tutors to one 60-second session for that specific day. Tutors will receive a random set of questions they haven't played yet.
+                    </p>
                   </div>
                 </div>
               </section>
-            </div>
-          )}
 
-          {activeTab === 'tutor-trivia' && (
-            <div className="space-y-8">
-              <section className="glass-panel space-y-6 text-center py-12">
-                <div className="w-20 h-20 bg-accent/10 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-accent/20">
-                  <Calendar className="w-10 h-10 text-accent" />
+              {/* Danger Zone */}
+              <section className="glass-panel border-red-500/20">
+                <div className="flex items-center gap-2 mb-6">
+                  <StopCircle className="w-5 h-5 text-red-500" />
+                  <h3 className="font-bold text-lg uppercase tracking-tight text-white">System Overrides</h3>
                 </div>
-                
-                <div>
-                  <h3 className="text-4xl font-black text-white uppercase tracking-tighter mb-2">Tutor Trivia Admin</h3>
-                  <p className="text-zinc-500 text-sm font-medium mb-8">Current Active Day: <span className="text-accent font-black">{config?.tutor_trivia_day || 1}</span></p>
-                </div>
-
-                <div className="flex flex-col items-center gap-6">
-                  <div className="flex gap-2 mb-4">
-                    {[1, 2, 3, 4, 5].map((day) => (
-                      <button
-                        key={day}
-                        onClick={() => handleSetTutorDay(day)}
-                        className={`w-12 h-12 rounded-xl font-black flex items-center justify-center transition-all border ${
-                          config?.tutor_trivia_day === day
-                            ? 'premium-gradient border-transparent text-white shadow-glow'
-                            : 'bg-zinc-900 border-white/5 text-zinc-500 hover:border-accent/30 hover:text-white'
-                        }`}
-                      >
-                        {day}
-                      </button>
-                    ))}
-                  </div>
-
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <button 
-                    onClick={handleNextTutorDay}
-                    className="premium-gradient py-5 px-12 rounded-2xl font-black text-xl flex items-center gap-3 hover:shadow-glow transition-all active:scale-[0.98] uppercase tracking-widest"
+                    onClick={handleResetLeaderboard}
+                    className="flex items-center justify-center gap-3 p-4 rounded-xl font-bold bg-white/5 hover:bg-red-500/10 text-zinc-400 hover:text-red-400 border border-white/5 hover:border-red-500/20 transition-all"
                   >
-                    Go To Next Day
-                    <ArrowRightCircle className="w-6 h-6" />
+                    <Trash2 className="w-5 h-5" />
+                    RESET LEADERBOARD
                   </button>
-                  <p className="text-xs text-zinc-600 font-medium">Scores are only ranked on the current global day.</p>
+                  <button 
+                    onClick={handleStopGame}
+                    className="flex items-center justify-center gap-3 p-4 rounded-xl font-bold bg-white/5 hover:bg-red-500/10 text-zinc-400 hover:text-red-400 border border-white/5 hover:border-red-500/20 transition-all"
+                  >
+                    <Trash2 className="w-5 h-5" />
+                    PURGE ARENA
+                  </button>
                 </div>
               </section>
             </div>
           )}
+
+          {/* Wordle and Tutor Trivia sections disabled */}
         </motion.div>
       </AnimatePresence>
 

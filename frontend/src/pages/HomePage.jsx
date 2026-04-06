@@ -20,11 +20,19 @@ const HomePage = () => {
       </motion.div>
 
       <div className="grid gap-4 sm:gap-5">
-        <GameCard
+{/* <GameCard
           title="Tutor Trivia"
           description="Match facts to tutors. 100 points per correct guess, −25 for each miss."
           icon={Users}
           route="/tutor-trivia"
+          accentColor="accent"
+        /> */}
+
+        <GameCard
+          title="Logic Sprint"
+          description="Think fast. 60 seconds to solve as many logic and math hurdles as possible."
+          icon={Gamepad2}
+          route="/logic-sprint"
           accentColor="accent"
         />
 

@@ -1,16 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import * as api from '../api';
 import { motion } from 'framer-motion';
-import { Gamepad2, Trophy, Users } from 'lucide-react';
+import { Zap, Trophy, Users } from 'lucide-react';
 
 const FILTERS = [
-  // { key: 'wordle', label: 'Wordle', icon: Gamepad2 },
-  { key: 'tutor_trivia', label: 'Tutor Trivia', icon: Users },
+  { key: 'logic_sprint', label: 'Logic Sprint', icon: Zap },
 ];
 
 const Leaderboard = () => {
   const [stats, setStats] = useState([]);
-  const [activeFilter, setActiveFilter] = useState('tutor_trivia');
+  const [activeFilter, setActiveFilter] = useState('logic_sprint');
 
   const fetchLeaderboard = async (gameType) => {
     try {

@@ -11,7 +11,8 @@ from pydantic import BaseModel, EmailStr
 import models, database, auth
 from database import engine
 # from games.wordle.router import router as wordle_router
-from games.tutor_trivia.router import router as tutor_trivia_router
+# from games.tutor_trivia.router import router as tutor_trivia_router
+from games.logic_sprint.router import router as logic_sprint_router
 
 
 # models.Base.metadata.create_all(bind=engine) # Moved to startup_event
@@ -119,6 +120,20 @@ def ensure_game_config_wordle_day_column() -> None:
     except Exception as e:
         print(f"Warning: could not ensure `game_config.wordle_day` column: {e}")
 
+def ensure_game_config_logic_sprint_day_column() -> None:
+    try:
+        inspector = inspect(engine)
+        if "game_config" not in inspector.get_table_names():
+            return
+        columns = {c["name"] for c in inspector.get_columns("game_config")}
+        if "logic_sprint_day" in columns:
+            return
+        with engine.begin() as conn:
+            conn.execute(text("ALTER TABLE game_config ADD COLUMN logic_sprint_day INTEGER DEFAULT 1"))
+        print("Added missing `game_config.logic_sprint_day` column.")
+    except Exception as e:
+        print(f"Warning: could not ensure `game_config.logic_sprint_day` column: {e}")
+
 def ensure_game_history_is_ranked_column() -> None:
     try:
         inspector = inspect(engine)
@@ -148,6 +163,7 @@ async def startup_event():
         ensure_game_history_game_type_column()
         ensure_game_config_tutor_trivia_day_column()
         ensure_game_config_wordle_day_column()
+        ensure_game_config_logic_sprint_day_column()
         ensure_game_history_is_ranked_column()
         
         # Seed whitelist if empty
@@ -157,6 +173,26 @@ async def startup_event():
             for email in initial_emails:
                 db.add(models.WhitelistedEmail(email=email))
             db.commit()
+
+        # Seed Logic Sprint sets if EMPTY
+        if db.query(models.LogicSprintQuestionSet).count() == 0:
+            print("Seeding Logic Sprint question sets...")
+            from games.logic_sprint.task_generator import generate_task
+            for set_num in range(1, 6):
+                # Generate 100 tasks per set
+                # We vary the 'elapsed' to get increasing difficulty
+                tasks_list = []
+                for i in range(100):
+                    # Simulate progression over 60s
+                    simulated_elapsed = (i / 100) * 60
+                    tasks_list.append(generate_task(simulated_elapsed))
+                
+                db.add(models.LogicSprintQuestionSet(
+                    set_number=set_num,
+                    tasks=tasks_list
+                ))
+            db.commit()
+            print("Logic Sprint question sets seeded.")
     finally:
         db.close()
 
@@ -168,7 +204,8 @@ async def read_root():
 
 # ── Mount game sub-routers ──────────────────────────────────────────
 # app.include_router(wordle_router)
-app.include_router(tutor_trivia_router)
+# app.include_router(tutor_trivia_router)
+app.include_router(logic_sprint_router)
 
 
 # @app.get("/state")
@@ -208,7 +245,7 @@ class WordleScheduleRequest(BaseModel):
 
 
 @app.get("/leaderboard")
-async def get_leaderboard(game_type: Optional[str] = 'tutor_trivia', db: Session = Depends(database.get_db)):
+async def get_leaderboard(game_type: Optional[str] = 'logic_sprint', db: Session = Depends(database.get_db)):
     # Sum scores from history per user, optionally filtered by game_type
     from sqlalchemy import func
 
@@ -330,6 +367,22 @@ async def update_tutor_trivia_config(data: dict, db: Session = Depends(database.
     db.commit()
     return {"status": "updated", "tutor_trivia_day": day}
 
+@app.post("/admin/game/logic-sprint")
+async def update_logic_sprint_config(data: dict, db: Session = Depends(database.get_db), admin: models.User = Depends(auth.admin_required)):
+    day = data.get("day")
+    if day is None:
+        raise HTTPException(status_code=400, detail="Day is required")
+    
+    config = db.query(models.GameConfig).first()
+    if not config:
+        config = models.GameConfig(logic_sprint_day=day, is_active=True)
+        db.add(config)
+    else:
+        config.logic_sprint_day = day
+    
+    db.commit()
+    return {"status": "updated", "logic_sprint_day": day}
+
 # @app.get("/admin/wordle/schedule")
 # async def get_wordle_schedule(db: Session = Depends(database.get_db)), admin: models.User = Depends(auth.admin_required)):
 #     return db.query(models.WordleWord).order_by(models.WordleWord.day).all()
@@ -367,18 +420,18 @@ async def update_tutor_trivia_config(data: dict, db: Session = Depends(database.
 #     db.commit()
 #     return {"status": "updated", "wordle_day": day}
 
-@app.post("/admin/game/tutor-trivia/next-day")
-async def next_tutor_trivia_day(db: Session = Depends(database.get_db), admin: models.User = Depends(auth.admin_required)):
-    config = db.query(models.GameConfig).first()
-    if not config:
-        config = models.GameConfig(tutor_trivia_day=2, is_active=True)
-        db.add(config)
-    else:
-        # Wrap around or cap at 5 since data only has 1-5 currently
-        config.tutor_trivia_day = (config.tutor_trivia_day % 5) + 1
-    
-    db.commit()
-    return {"status": "advanced", "tutor_trivia_day": config.tutor_trivia_day}
+# @app.post("/admin/game/tutor-trivia/next-day")
+# async def next_tutor_trivia_day(db: Session = Depends(database.get_db), admin: models.User = Depends(auth.admin_required)):
+#     config = db.query(models.GameConfig).first()
+#     if not config:
+#         config = models.GameConfig(tutor_trivia_day=2, is_active=True)
+#         db.add(config)
+#     else:
+#         # Wrap around or cap at 5 since data only has 1-5 currently
+#         config.tutor_trivia_day = (config.tutor_trivia_day % 5) + 1
+#     
+#     db.commit()
+#     return {"status": "advanced", "tutor_trivia_day": config.tutor_trivia_day}
 
 @app.delete("/admin/game")
 async def delete_game(db: Session = Depends(database.get_db), admin: models.User = Depends(auth.admin_required)):
