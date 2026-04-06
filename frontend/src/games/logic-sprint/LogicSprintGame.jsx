@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { startGame, submitAnswer, getGameState } from './logicSprintApi';
 import {
   Timer,
@@ -63,38 +64,38 @@ const Keypad = ({ onInput, onClear, onSubmit, onBoolean }) => (
       <button
         key={n}
         onClick={() => onInput(n.toString())}
-        className="h-14 rounded-xl bg-white/5 border border-white/10 text-xl font-bold hover:bg-white/10 active:scale-95 transition-all text-white"
+        className="h-12 sm:h-14 rounded-xl bg-white/5 border border-white/10 text-lg sm:text-xl font-bold hover:bg-white/10 active:scale-95 transition-all text-white"
       >
         {n}
       </button>
     ))}
     <button
       onClick={() => onBoolean('TRUE')}
-      className="h-14 rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-xs font-black uppercase text-emerald-400 hover:bg-emerald-500/30"
+      className="h-12 sm:h-14 rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-[10px] sm:text-xs font-black uppercase text-emerald-400 hover:bg-emerald-500/30"
     >
       TRUE
     </button>
     <button
       onClick={() => onInput('0')}
-      className="h-14 rounded-xl bg-white/5 border border-white/10 text-xl font-bold hover:bg-white/10 text-white"
+      className="h-12 sm:h-14 rounded-xl bg-white/5 border border-white/10 text-lg sm:text-xl font-bold hover:bg-white/10 text-white"
     >
       0
     </button>
     <button
       onClick={() => onBoolean('FALSE')}
-      className="h-14 rounded-xl bg-red-500/20 border border-red-500/30 text-xs font-black uppercase text-red-400 hover:bg-red-500/30"
+      className="h-12 sm:h-14 rounded-xl bg-red-500/20 border border-red-500/30 text-[10px] sm:text-xs font-black uppercase text-red-400 hover:bg-red-500/30"
     >
       FALSE
     </button>
     <button
       onClick={onClear}
-      className="col-span-1 h-14 rounded-xl bg-white/5 border border-white/10 text-zinc-500 hover:text-zinc-300 flex items-center justify-center font-bold"
+      className="col-span-1 h-12 sm:h-14 rounded-xl bg-white/5 border border-white/10 text-zinc-500 hover:text-zinc-300 flex items-center justify-center font-bold"
     >
       DEL
     </button>
     <button
       onClick={onSubmit}
-      className="col-span-2 h-14 rounded-xl premium-gradient text-white font-black uppercase tracking-widest shadow-glow py-4"
+      className="col-span-2 h-12 sm:h-14 rounded-xl premium-gradient text-white font-black uppercase tracking-[0.2em] sm:tracking-widest shadow-glow py-3 sm:py-4 text-sm sm:text-base"
     >
       GO
     </button>
@@ -138,6 +139,7 @@ const GameComplete = ({ score, solved, onRestart }) => (
 /* ─── Main Component ─── */
 
 const LogicSprintGame = ({ onFinish }) => {
+  const navigate = useNavigate();
   const [gameState, setGameState] = useState(null);
   const [userInput, setUserInput] = useState('');
   const [loading, setLoading] = useState(true);
@@ -278,24 +280,25 @@ const LogicSprintGame = ({ onFinish }) => {
             </div>
          </div>
          <button 
-           onClick={() => onFinish && onFinish()}
-           className="w-full bg-white/5 hover:bg-white/10 text-zinc-400 font-bold p-4 rounded-xl transition-all uppercase tracking-widest text-xs"
+           onClick={() => navigate('/leaderboard')}
+           className="w-full premium-gradient p-4 rounded-xl font-black uppercase tracking-widest flex items-center justify-center gap-2 hover:shadow-glow transition-all active:scale-95 text-white"
          >
-           Exit to Summary
+           <Trophy className="w-5 h-5" />
+           Go to Leaderboard
          </button>
       </div>
     );
   }
 
   return (
-    <div className="w-full max-w-xl mx-auto space-y-6">
+    <div className="w-full max-w-xl mx-auto space-y-4 sm:space-y-6">
       {/* Header Bar */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className={`p-2 rounded-xl transition-colors ${timeLeft <= 10 ? 'bg-red-500/20 text-red-400' : 'bg-white/5 text-zinc-400'}`}>
             <Timer className={`w-5 h-5 ${timeLeft <= 10 ? 'animate-pulse' : ''}`} />
           </div>
-          <span className={`text-2xl font-black tabular-nums ${timeLeft <= 10 ? 'text-red-400' : 'text-white'}`}>
+          <span className={`text-xl sm:text-2xl font-black tabular-nums ${timeLeft <= 10 ? 'text-red-400' : 'text-white'}`}>
             {timeLeft}s
           </span>
         </div>
@@ -308,7 +311,7 @@ const LogicSprintGame = ({ onFinish }) => {
       {/* Task Card */}
       <motion.div
         animate={feedback === 'wrong' ? { x: [-10, 10, -10, 10, 0] } : {}}
-        className={`relative glass-panel py-12 px-6 text-center border-t-2 transition-colors duration-300 ${
+        className={`relative glass-panel py-8 sm:py-12 px-4 sm:px-6 text-center border-t-2 transition-colors duration-300 ${
           feedback === 'correct' ? 'border-emerald-500/50 bg-emerald-500/5' : 
           feedback === 'wrong' ? 'border-red-500/50 bg-red-500/5' : 'border-accent/40'
         }`}
@@ -324,7 +327,7 @@ const LogicSprintGame = ({ onFinish }) => {
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: -20, opacity: 0 }}
-            className="text-4xl sm:text-6xl font-black text-white tracking-tight"
+            className="text-3xl sm:text-5xl font-black text-white tracking-tight"
           >
             {gameState.current_task}
           </motion.h3>
@@ -332,7 +335,7 @@ const LogicSprintGame = ({ onFinish }) => {
 
         <div className="mt-8 flex flex-col items-center">
             <div className="text-xs font-black text-zinc-600 uppercase tracking-[0.3em] mb-2">Your Answer</div>
-            <div className="text-4xl font-black text-accent h-10 flex items-center justify-center gap-1">
+            <div className="text-3xl sm:text-4xl font-black text-accent h-10 flex items-center justify-center gap-1">
                 {userInput || <span className="w-1 h-8 bg-accent/20 animate-pulse" />}
             </div>
         </div>

@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { signInWithGoogle, logout, subscribeToAuthChanges } from './firebase';
 import * as api from './api';
 
-import { User, Edit3, CheckCircle2 } from 'lucide-react';
+import { User, Edit3, CheckCircle2, Menu, X } from 'lucide-react';
 
 const NicknamePrompt = ({ onComplete }) => {
   const [nickname, setNickname] = useState('');
@@ -117,6 +117,7 @@ function App() {
   const [user, setUser] = useState(null);
   const [userData, setUserData] = useState(null);
   const [error, setError] = useState('');
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -166,6 +167,7 @@ function App() {
     logout();
     setUser(null);
     setUserData(null);
+    setIsMenuOpen(false);
     navigate('/');
   };
 
@@ -199,15 +201,20 @@ function App() {
   }
 
   const navLinkClass = ({ isActive }) =>
-    `font-bold text-[10px] sm:text-sm tracking-widest uppercase transition-colors whitespace-nowrap ${isActive ? 'text-accent' : 'text-zinc-500 hover:text-zinc-300'}`;
+    `font-black text-xs sm:text-sm tracking-[0.2em] uppercase transition-all whitespace-nowrap ${isActive ? 'text-accent' : 'text-zinc-500 hover:text-zinc-300'}`;
+
+  const mobileNavLinkClass = ({ isActive }) =>
+    `text-4xl font-black tracking-tighter uppercase transition-all ${isActive ? 'text-accent' : 'text-white'}`;
 
   return (
     <div className="flex flex-col items-center w-full max-w-4xl mx-auto p-4 min-h-screen font-sans">
-      <header className="flex flex-col sm:flex-row justify-between items-center w-full mb-8 sm:mb-12 py-4 sm:py-6 border-b border-white/5 gap-6 sm:gap-0">
-        <h1 className="text-xl sm:text-2xl font-black tracking-tighter font-display cursor-pointer" onClick={() => navigate('/')}>
+      <header className="flex justify-between items-center w-full mb-8 sm:mb-12 py-4 sm:py-6 border-b border-white/5 relative z-[100]">
+        <h1 className="text-xl sm:text-2xl font-black tracking-tighter font-display cursor-pointer" onClick={() => { navigate('/'); setIsMenuOpen(false); }}>
           PULSE <span className="text-zinc-500 font-extralight text-lg sm:text-xl">GAMING</span>
         </h1>
-        <div className="flex items-center gap-4 sm:gap-6 overflow-x-auto w-full sm:w-auto justify-center sm:justify-end py-2 sm:py-0">
+        
+        {/* Desktop Nav */}
+        <div className="hidden sm:flex items-center gap-8">
           <NavLink to="/" end className={navLinkClass}>
             Games
           </NavLink>
@@ -219,14 +226,69 @@ function App() {
               Admin
             </NavLink>
           )}
-          <div className="hidden sm:block h-4 w-[1px] bg-zinc-800" />
+          <div className="h-4 w-[1px] bg-zinc-800 mx-2" />
           <button 
             onClick={handleLogout}
-            className="text-zinc-600 hover:text-red-400 text-[10px] sm:text-xs font-bold uppercase tracking-tighter transition-colors whitespace-nowrap"
+            className="text-zinc-600 hover:text-red-400 text-xs font-black uppercase tracking-widest transition-colors whitespace-nowrap"
           >
             Logout
           </button>
         </div>
+
+        {/* Mobile Toggle */}
+        <button 
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+          className="sm:hidden p-2 text-white hover:text-accent transition-colors"
+        >
+          {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+        </button>
+
+        {/* Mobile Menu Overlay */}
+        <AnimatePresence>
+          {isMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, x: '100%' }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="fixed inset-0 z-[90] bg-dark/95 backdrop-blur-2xl flex flex-col items-center justify-center p-8 sm:hidden"
+            >
+              <nav className="flex flex-col items-center gap-8 text-center">
+                <NavLink 
+                  to="/" 
+                  end 
+                  onClick={() => setIsMenuOpen(false)}
+                  className={mobileNavLinkClass}
+                >
+                  Games
+                </NavLink>
+                <NavLink 
+                  to="/leaderboard" 
+                  onClick={() => setIsMenuOpen(false)}
+                  className={mobileNavLinkClass}
+                >
+                  Leaderboard
+                </NavLink>
+                {userData?.is_admin && (
+                  <NavLink 
+                    to="/admin" 
+                    onClick={() => setIsMenuOpen(false)}
+                    className={mobileNavLinkClass}
+                  >
+                    Admin
+                  </NavLink>
+                )}
+                <div className="w-12 h-1 bg-white/10 my-4" />
+                <button 
+                  onClick={handleLogout}
+                  className="text-zinc-500 hover:text-red-400 text-xl font-black uppercase tracking-widest transition-colors"
+                >
+                  Logout
+                </button>
+              </nav>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </header>
 
       <main className="w-full">

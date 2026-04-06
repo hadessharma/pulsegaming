@@ -201,13 +201,12 @@ async def startup_event():
             print("Seeding Logic Sprint question sets...")
             from games.logic_sprint.task_generator import generate_task
             for set_num in range(1, 6):
-                # Generate 100 tasks per set
-                # We vary the 'elapsed' to get increasing difficulty
+                # Generate 35 tasks per set
+                # We vary the difficulty from 0.0 to 1.0
                 tasks_list = []
-                for i in range(100):
-                    # Simulate progression over 60s
-                    simulated_elapsed = (i / 100) * 60
-                    tasks_list.append(generate_task(simulated_elapsed))
+                for i in range(35):
+                    difficulty = i / 35.0
+                    tasks_list.append(generate_task(difficulty))
                 
                 db.add(models.LogicSprintQuestionSet(
                     set_number=set_num,
@@ -280,12 +279,13 @@ async def get_leaderboard(game_type: Optional[str] = 'logic_sprint', db: Session
         models.User.email,
         models.User.nickname,
         func.coalesce(func.sum(models.GameHistory.score), 0).label("total_score"),
-        func.count(models.GameHistory.id).label("games_played")
+        func.count(models.GameHistory.id).label("games_played"),
+        func.coalesce(func.sum(models.GameHistory.guesses_count), 0).label("total_solved")
     ).outerjoin(models.GameHistory, join_condition).group_by(
         models.User.id, 
         models.User.email, 
         models.User.nickname
-    ).order_by(func.coalesce(func.sum(models.GameHistory.score), 0).desc()).all()
+    ).having(func.count(models.GameHistory.id) > 0).order_by(func.coalesce(func.sum(models.GameHistory.score), 0).desc()).all()
     
     results = []
     for s in stats:
@@ -293,7 +293,8 @@ async def get_leaderboard(game_type: Optional[str] = 'logic_sprint', db: Session
             "email": s.email,
             "nickname": s.nickname or s.email.split('@')[0],
             "score": int(s.total_score),
-            "games": s.games_played
+            "games": s.games_played,
+            "solved": int(s.total_solved)
         })
     
     return results
@@ -460,12 +461,17 @@ async def delete_game(db: Session = Depends(database.get_db), admin: models.User
     # Total wipe of game config and all user sessions
     db.query(models.GameConfig).delete()
     db.query(models.GameState).delete()
+    db.query(models.LogicSprintState).delete()
+    db.query(models.TutorTriviaState).delete()
     db.commit()
     return {"status": "wiped", "message": "All game data and sessions have been cleared."}
 
 @app.delete("/admin/leaderboard")
 async def reset_leaderboard(db: Session = Depends(database.get_db), admin: models.User = Depends(auth.admin_required)):
-    # Wipe all cumulative game history
+    # Wipe all cumulative game history AND current session states to allow replay
     db.query(models.GameHistory).delete()
+    db.query(models.LogicSprintState).delete()
+    db.query(models.TutorTriviaState).delete()
+    db.query(models.GameState).delete()
     db.commit()
-    return {"status": "reset", "message": "Leaderboard history has been cleared."}
+    return {"status": "reset", "message": "Leaderboard history and all game states have been cleared."}
