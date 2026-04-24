@@ -187,6 +187,26 @@ def ensure_logic_sprint_state_columns() -> None:
     except Exception as e:
         print(f"Warning: could not ensure `logic_sprint_states` columns: {e}")
 
+def ensure_asu_trivia_state_start_time_column() -> None:
+    try:
+        inspector = inspect(engine)
+        if "asu_trivia_states" not in inspector.get_table_names():
+            return
+        columns = {c["name"] for c in inspector.get_columns("asu_trivia_states")}
+        dialect = engine.dialect.name
+        
+        with engine.begin() as conn:
+            if "question_start_time" not in columns:
+                col_type = "DATETIME" if dialect == "sqlite" else "TIMESTAMP"
+                conn.execute(text(f"ALTER TABLE asu_trivia_states ADD COLUMN question_start_time {col_type}"))
+                print("Added `asu_trivia_states.question_start_time` column.")
+            if "session_start_time" not in columns:
+                col_type = "DATETIME" if dialect == "sqlite" else "TIMESTAMP"
+                conn.execute(text(f"ALTER TABLE asu_trivia_states ADD COLUMN session_start_time {col_type}"))
+                print("Added `asu_trivia_states.session_start_time` column.")
+    except Exception as e:
+        print(f"Warning: could not ensure `asu_trivia_states` columns: {e}")
+
 @app.on_event("startup")
 async def startup_event():
     db = database.SessionLocal()
@@ -203,6 +223,7 @@ async def startup_event():
         ensure_game_config_asu_trivia_day_column()
         ensure_game_history_is_ranked_column()
         ensure_logic_sprint_state_columns()
+        ensure_asu_trivia_state_start_time_column()
         
         # Seed whitelist if empty
         if db.query(models.WhitelistedEmail).count() == 0:

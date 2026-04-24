@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import * as api from '../../api';
-import { BookOpen, CheckCircle2, ArrowRight, PlayCircle, Loader2, Award, Info } from 'lucide-react';
+import { BookOpen, CheckCircle2, ArrowRight, PlayCircle, Loader2, Award, Info, Timer } from 'lucide-react';
 import clsx from 'clsx';
 
 const ASUTriviaPage = () => {
@@ -17,6 +17,18 @@ const ASUTriviaPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitResult, setSubmitResult] = useState(null); // { correct, fact, correct_answer_index, next_question, ... }
 
+  const [elapsedTime, setElapsedTime] = useState(0);
+
+  useEffect(() => {
+    let timer;
+    if (gameState === 'playing' && !submitResult) {
+      timer = setInterval(() => {
+        setElapsedTime(prev => prev + 1);
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [gameState, submitResult]);
+
   useEffect(() => {
     const init = async () => {
       try {
@@ -26,6 +38,7 @@ const ASUTriviaPage = () => {
           setScore(state.score);
           setCurrentQuestion(state.current_question);
           setCurrentIndex(state.current_index);
+          setTotalQuestions(state.total_questions);
           setTotalQuestions(state.total_questions);
         } else if (state.status === 'already_played') {
           setGameState('already_played');
@@ -53,6 +66,7 @@ const ASUTriviaPage = () => {
         setScore(res.score);
         setCurrentQuestion(res.current_question);
         setCurrentIndex(res.current_index);
+        setTotalQuestions(res.total_questions);
         setTotalQuestions(res.total_questions);
       }
     } catch (err) {
@@ -91,6 +105,7 @@ const ASUTriviaPage = () => {
     } else {
       setCurrentQuestion(submitResult.next_question);
       setCurrentIndex(submitResult.current_index);
+      setCurrentIndex(submitResult.current_index);
     }
     
     // Reset selection state
@@ -118,6 +133,26 @@ const ASUTriviaPage = () => {
           <p className="text-zinc-400 font-medium mb-8 max-w-md mx-auto">
             Test your knowledge of ASU's rich history, iconic campus, and legendary sports. 5 random questions a day. Are you ready?
           </p>
+
+          <div className="bg-zinc-950/50 border border-white/5 p-6 rounded-2xl max-w-sm mx-auto mb-8 text-left">
+            <h3 className="text-white font-bold uppercase tracking-widest text-sm mb-4 flex items-center gap-2">
+              <Award className="w-4 h-4 text-accent" /> Scoring Matrix
+            </h3>
+            <ul className="space-y-3 text-sm font-medium text-zinc-400">
+              <li className="flex justify-between items-center">
+                <span>Correct Answer Base</span>
+                <span className="text-emerald-400 font-black">+100</span>
+              </li>
+              <li className="flex justify-between items-center">
+                <span>Time Penalty</span>
+                <span className="text-red-400 font-black">-5 / sec</span>
+              </li>
+              <li className="flex justify-between items-center pt-2 border-t border-white/5">
+                <span>Wrong Answer</span>
+                <span className="text-red-500 font-black">-25</span>
+              </li>
+            </ul>
+          </div>
           <button
             onClick={handleStart}
             className="w-full sm:w-auto premium-gradient px-12 py-4 rounded-xl font-bold text-xl hover:shadow-glow transition-all active:scale-[0.98] flex items-center justify-center gap-3 mx-auto uppercase tracking-widest"
@@ -161,7 +196,7 @@ const ASUTriviaPage = () => {
     if (gameState === 'playing' && currentQuestion) {
       return (
         <motion.div key={currentIndex} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="w-full">
-          <div className="flex justify-between items-center mb-8 pb-6 border-b border-white/5">
+          <div className="flex justify-between items-center mb-6 pb-4 border-b border-white/5">
             <div>
               <p className="text-zinc-500 font-bold uppercase tracking-widest text-xs">Question {currentIndex + 1} of {totalQuestions}</p>
               <div className="flex items-center gap-2 mt-1">
@@ -178,7 +213,16 @@ const ASUTriviaPage = () => {
             </div>
           </div>
 
-          <h3 className="text-2xl sm:text-3xl font-black text-white leading-tight mb-8">
+          <div className="flex items-center gap-4 mb-6 bg-zinc-950/50 p-3 rounded-xl border border-white/5">
+            <div className="flex items-center gap-2 flex-1 justify-center">
+              <Timer className="w-5 h-5 text-accent" />
+              <span className="font-black text-xl text-white tracking-widest font-mono">
+                {Math.floor(elapsedTime / 60).toString().padStart(2, '0')}:{(elapsedTime % 60).toString().padStart(2, '0')}
+              </span>
+            </div>
+          </div>
+
+          <h3 className="text-xl sm:text-3xl font-black text-white leading-tight mb-8">
             {currentQuestion.question}
           </h3>
 
@@ -241,7 +285,7 @@ const ASUTriviaPage = () => {
                       "font-black uppercase tracking-widest text-sm mb-1",
                       submitResult.correct ? "text-emerald-500" : "text-red-500"
                     )}>
-                      {submitResult.correct ? "Correct! +100" : "Incorrect -25"}
+                      {submitResult.correct ? `Correct! +${submitResult.points_earned}` : `Incorrect ${submitResult.points_earned}`}
                     </h4>
                     <p className="text-zinc-300 text-sm leading-relaxed">
                       {submitResult.fact}
@@ -281,8 +325,8 @@ const ASUTriviaPage = () => {
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto">
-      <div className="glass-panel min-h-[400px] flex flex-col justify-center relative overflow-hidden">
+    <div className="w-full max-w-2xl mx-auto px-4 sm:px-0">
+      <div className="glass-panel min-h-[400px] flex flex-col justify-center relative overflow-hidden p-6 sm:p-10">
         {renderContent()}
       </div>
     </div>

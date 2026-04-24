@@ -119,6 +119,8 @@ class ASUTriviaState(Base):
     score = Column(Integer, default=0)
     questions = Column(JSON, default=[]) # List of question IDs
     current_index = Column(Integer, default=0)
+    question_start_time = Column(DateTime, default=datetime.utcnow)
+    session_start_time = Column(DateTime, default=datetime.utcnow)
     completed = Column(Boolean, default=False)
 
     user = relationship("User")

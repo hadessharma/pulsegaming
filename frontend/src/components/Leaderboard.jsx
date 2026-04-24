@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import * as api from '../api';
-import { Zap, Trophy, Users, ChevronDown, ChevronUp, Calendar, CheckSquare } from 'lucide-react';
+import { Zap, Trophy, Users, ChevronDown, ChevronUp, Calendar, CheckSquare, BookOpen } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 
 const FILTERS = [
-  { key: 'logic_sprint', label: 'Logic Sprint', icon: Zap },
+  { key: 'asu_trivia', label: 'ASU Trivia', icon: BookOpen },
 ];
 
 const Leaderboard = () => {
   const [stats, setStats] = useState([]);
-  const [activeFilter, setActiveFilter] = useState('logic_sprint');
+  const [activeFilter, setActiveFilter] = useState('asu_trivia');
   const [expandedId, setExpandedId] = useState(null);
 
   const fetchLeaderboard = async (gameType) => {

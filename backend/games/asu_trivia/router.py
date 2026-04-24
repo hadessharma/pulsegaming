@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from typing import Optional
+from datetime import datetime
 
 import models, auth, database
 
@@ -52,7 +53,9 @@ async def start_game(
                 "label": q_data["label"]
             },
             "current_index": existing.current_index,
-            "total_questions": len(existing.questions)
+            "total_questions": len(existing.questions),
+            "question_start_time": existing.question_start_time.isoformat() + "Z" if existing.question_start_time else None,
+            "session_start_time": existing.session_start_time.isoformat() + "Z" if getattr(existing, 'session_start_time', None) else None
         }
 
     # Assign 5 random questions the user hasn't seen
@@ -96,7 +99,9 @@ async def start_game(
             "label": q_data["label"]
         },
         "current_index": 0,
-        "total_questions": len(selected_ids)
+        "total_questions": len(selected_ids),
+        "question_start_time": new_session.question_start_time.isoformat() + "Z" if new_session.question_start_time else None,
+        "session_start_time": new_session.session_start_time.isoformat() + "Z" if getattr(new_session, 'session_start_time', None) else None
     }
 
 @router.post("/submit")
@@ -121,18 +126,27 @@ async def submit_answer(
     q_data = next((q for q in all_questions if q["id"] == q_id), None)
 
     is_correct = (req.answer_index == q_data["answer_index"])
+    
+    if session.question_start_time is None:
+        elapsed = 0
+    else:
+        elapsed = (datetime.utcnow() - session.question_start_time).total_seconds()
 
     if is_correct:
-        session.score += 100
+        points_earned = max(10, int(100 - (elapsed * 5)))
+        session.score += points_earned
     else:
-        session.score -= 25
+        points_earned = -25
+        session.score += points_earned
 
     # Move to next
     session.current_index += 1
     
     finished = session.current_index >= len(session.questions)
     
-    if finished:
+    if not finished:
+        session.question_start_time = datetime.utcnow()
+    else:
         session.completed = True
         
         # Save to history
@@ -161,6 +175,7 @@ async def submit_answer(
     response = {
         "correct": is_correct,
         "score": session.score,
+        "points_earned": points_earned,
         "fact": q_data["fact"],
         "correct_answer_index": q_data["answer_index"],
         "status": "finished" if finished else "playing"
@@ -176,6 +191,8 @@ async def submit_answer(
             "label": next_q_data["label"]
         }
         response["current_index"] = session.current_index
+        response["question_start_time"] = session.question_start_time.isoformat() + "Z" if session.question_start_time else None
+        response["session_start_time"] = session.session_start_time.isoformat() + "Z" if getattr(session, 'session_start_time', None) else None
 
     return response
 
@@ -212,5 +229,7 @@ async def get_state(
             "label": q_data["label"]
         },
         "current_index": session.current_index,
-        "total_questions": len(session.questions)
+        "total_questions": len(session.questions),
+        "question_start_time": session.question_start_time.isoformat() + "Z" if session.question_start_time else None,
+        "session_start_time": session.session_start_time.isoformat() + "Z" if getattr(session, 'session_start_time', None) else None
     }
