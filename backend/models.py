@@ -41,6 +41,7 @@ class GameConfig(Base):
     tutor_trivia_day = Column(Integer, default=1)
     wordle_day = Column(Integer, default=1)
     logic_sprint_day = Column(Integer, default=1)
+    asu_trivia_day = Column(Integer, default=1)
     is_active = Column(Boolean, default=True)
 
 class WordleWord(Base):
@@ -108,3 +109,16 @@ class LogicSprintQuestionSet(Base):
     id = Column(Integer, primary_key=True, index=True)
     set_number = Column(Integer, unique=True, index=True)
     tasks = Column(JSON, nullable=False) # List of generated tasks
+
+class ASUTriviaState(Base):
+    __tablename__ = "asu_trivia_states"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    day = Column(Integer, nullable=False, index=True)
+    score = Column(Integer, default=0)
+    questions = Column(JSON, default=[]) # List of question IDs
+    current_index = Column(Integer, default=0)
+    completed = Column(Boolean, default=False)
+
+    user = relationship("User")

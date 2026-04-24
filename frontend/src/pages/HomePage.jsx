@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import GameCard from '../components/GameCard';
-import { Gamepad2, Users } from 'lucide-react';
+import { Gamepad2, Users, BookOpen } from 'lucide-react';
 
 const HomePage = () => {
   return (
@@ -29,12 +29,20 @@ const HomePage = () => {
         /> */}
 
         <GameCard
+          title="ASU Trivia"
+          description="Test your knowledge of Arizona State University history, sports, and campus life."
+          icon={BookOpen}
+          route="/asu-trivia"
+          accentColor="accent"
+        />
+
+{/* <GameCard
           title="Logic Sprint"
           description="Think fast. 60 seconds to solve as many logic and math hurdles as possible."
           icon={Gamepad2}
           route="/logic-sprint"
           accentColor="accent"
-        />
+        /> */}
 
 {/* <GameCard
           title="Wordle"

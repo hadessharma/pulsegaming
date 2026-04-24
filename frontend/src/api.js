@@ -127,3 +127,23 @@ export const updateLogicSprintDay = async (day) => {
   const response = await api.post('/admin/game/logic-sprint', { day });
   return response.data;
 };
+
+export const startASUTrivia = async () => {
+  const response = await api.post('/asu-trivia/start');
+  return response.data;
+};
+
+export const submitASUTriviaAnswer = async (answer_index) => {
+  const response = await api.post('/asu-trivia/submit', { answer_index });
+  return response.data;
+};
+
+export const getASUTriviaState = async () => {
+  const response = await api.get('/asu-trivia/state');
+  return response.data;
+};
+
+export const updateASUTriviaDay = async (day) => {
+  const response = await api.post('/admin/game/asu-trivia', { day });
+  return response.data;
+};

@@ -1,0 +1,602 @@
+[
+  {
+    "id": 1,
+    "category": "history",
+    "label": "History",
+    "question": "In what year was ASU founded as the Territorial Normal School?",
+    "options": ["1879", "1885", "1891", "1912"],
+    "answer_index": 1,
+    "answer": "1885",
+    "fact": "ASU was founded on March 12, 1885 — a full 27 years before Arizona became a state in 1912."
+  },
+  {
+    "id": 2,
+    "category": "history",
+    "label": "History",
+    "question": "What was the original name of ASU when it first opened?",
+    "options": ["Arizona State College", "Tempe State University", "Territorial Normal School", "Arizona Teacher's Academy"],
+    "answer_index": 2,
+    "answer": "Territorial Normal School",
+    "fact": "It opened as the Territorial Normal School at Tempe, with just 33 students in a single four-room schoolhouse."
+  },
+  {
+    "id": 3,
+    "category": "history",
+    "label": "History",
+    "question": "How many students attended ASU's first class in 1886?",
+    "options": ["12", "21", "33", "50"],
+    "answer_index": 2,
+    "answer": "33",
+    "fact": "The first class had exactly 33 students, taught by first principal Hiram Bradford Farmer."
+  },
+  {
+    "id": 4,
+    "category": "campus",
+    "label": "Campus",
+    "question": "What is the oldest building on ASU's Tempe campus?",
+    "options": ["Hayden Library", "Grady Gammage Auditorium", "Old Main", "Manzanita Hall"],
+    "answer_index": 2,
+    "answer": "Old Main",
+    "fact": "Old Main was dedicated on February 4, 1898, and was also the first building in Tempe wired for electricity. It's now on the National Register of Historic Places."
+  },
+  {
+    "id": 5,
+    "category": "campus",
+    "label": "Campus",
+    "question": "Which famous architect designed the Grady Gammage Memorial Auditorium?",
+    "options": ["I.M. Pei", "Frank Lloyd Wright", "Louis Kahn", "Richard Meier"],
+    "answer_index": 1,
+    "answer": "Frank Lloyd Wright",
+    "fact": "Frank Lloyd Wright designed Grady Gammage — it was one of his last major commissions and was completed in 1964."
+  },
+  {
+    "id": 6,
+    "category": "history",
+    "label": "History",
+    "question": "ASU's school colors have been maroon and gold since what year?",
+    "options": ["1885", "1896", "1910", "1922"],
+    "answer_index": 1,
+    "answer": "1896",
+    "fact": "Maroon and gold have been ASU's official colors since 1896."
+  },
+  {
+    "id": 7,
+    "category": "campus",
+    "label": "Campus",
+    "question": "ASU's famous Palm Walk is lined by how many Mexican Fan Palms?",
+    "options": ["75", "98", "111", "150"],
+    "answer_index": 2,
+    "answer": "111",
+    "fact": "The 111 palms were planted under President Arthur John Matthews around the turn of the 20th century, creating one of ASU's most iconic walkways."
+  },
+  {
+    "id": 8,
+    "category": "history",
+    "label": "History",
+    "question": "In what year did voters approve the name change to 'Arizona State University'?",
+    "options": ["1945", "1951", "1958", "1962"],
+    "answer_index": 2,
+    "answer": "1958",
+    "fact": "In 1958, Arizona voters passed Proposition 200 by a 2-to-1 margin, officially renaming it Arizona State University."
+  },
+  {
+    "id": 9,
+    "category": "history",
+    "label": "History",
+    "question": "What was ASU called just before becoming a university?",
+    "options": ["Tempe Normal School", "Arizona State College", "Phoenix State University", "Arizona Teachers College"],
+    "answer_index": 1,
+    "answer": "Arizona State College",
+    "fact": "The school was called Arizona State College from 1945 until it became Arizona State University in 1958."
+  },
+  {
+    "id": 10,
+    "category": "history",
+    "label": "History",
+    "question": "Who was ASU's first principal when classes began in 1886?",
+    "options": ["Grady Gammage", "John Armstrong", "Hiram Bradford Farmer", "George Wilson"],
+    "answer_index": 2,
+    "answer": "Hiram Bradford Farmer",
+    "fact": "Hiram Bradford Farmer was ASU's first principal and held the first class in the four-room Normal School Building."
+  },
+  {
+    "id": 11,
+    "category": "campus",
+    "label": "Campus",
+    "question": "The Lantern Walk tradition at ASU dates back to what year?",
+    "options": ["1902", "1910", "1917", "1924"],
+    "answer_index": 2,
+    "answer": "1917",
+    "fact": "The Lantern Walk, one of ASU's most cherished traditions, has been held since 1917. Participants walk through campus and up 'A' Mountain."
+  },
+  {
+    "id": 12,
+    "category": "campus",
+    "label": "Campus",
+    "question": "What is 'A' Mountain officially called?",
+    "options": ["Devil's Butte", "Tempe Butte", "Sun Devil Peak", "Hayden Butte"],
+    "answer_index": 1,
+    "answer": "Tempe Butte",
+    "fact": "The hill is officially called Tempe Butte (also known as Hayden Butte). It has featured a large 'A' since 1938."
+  },
+  {
+    "id": 13,
+    "category": "campus",
+    "label": "Campus",
+    "question": "How many ancient Hohokam petroglyphs are found on 'A' Mountain?",
+    "options": ["100", "250", "500", "1,000"],
+    "answer_index": 2,
+    "answer": "500",
+    "fact": "A Mountain contains approximately 500 petroglyphs left by the prehistoric Hohokam people."
+  },
+  {
+    "id": 14,
+    "category": "history",
+    "label": "History",
+    "question": "Which U.S. President delivered the ASU commencement address in 2009 to a crowd of 70,000+?",
+    "options": ["George W. Bush", "Bill Clinton", "Barack Obama", "Joe Biden"],
+    "answer_index": 2,
+    "answer": "Barack Obama",
+    "fact": "President Barack Obama delivered the 2009 commencement, calling ASU's commitment to diversity and access 'the hallmark of real success.' It may have been the largest U.S. graduation in history."
+  },
+  {
+    "id": 15,
+    "category": "history",
+    "label": "History",
+    "question": "Which president spoke at the Tempe Normal School in 1911 and praised the institution?",
+    "options": ["William Taft", "Theodore Roosevelt", "Woodrow Wilson", "Warren Harding"],
+    "answer_index": 1,
+    "answer": "Theodore Roosevelt",
+    "fact": "President Theodore Roosevelt visited on March 20, 1911, stating he had 'a special feeling for this institution' because seven men from his regiment came from it."
+  },
+  {
+    "id": 16,
+    "category": "campus",
+    "label": "Campus",
+    "question": "ASU's Manzanita Hall, built in the 1960s, was notable for being what at the time?",
+    "options": ["The first co-ed dorm in Arizona", "The tallest building in Arizona", "The first LEED-certified dorm", "The oldest continuously occupied dorm in the US"],
+    "answer_index": 1,
+    "answer": "The tallest building in Arizona",
+    "fact": "The 15-story Manzanita Hall was, for a time, the tallest building in all of Arizona. It was also the first use of post-tensioned concrete construction in the state."
+  },
+  {
+    "id": 17,
+    "category": "campus",
+    "label": "Campus",
+    "question": "The Sun Devil Stadium sits between what unique geographical features?",
+    "options": ["Two rivers", "Two mountains (Tempe Buttes)", "A lake and a mountain", "Two desert mesas"],
+    "answer_index": 1,
+    "answer": "Two mountains (Tempe Buttes)",
+    "fact": "Sun Devil Stadium, built in 1958, is the only college football playing field located between two mountains — the Tempe Buttes."
+  },
+  {
+    "id": 18,
+    "category": "history",
+    "label": "History",
+    "question": "The first graduate degree offered at ASU was in what field?",
+    "options": ["Engineering", "Business", "Education", "Sciences"],
+    "answer_index": 2,
+    "answer": "Education",
+    "fact": "The first graduate degree at ASU was offered through the Mary Lou Fulton Teachers College in 1937 — fitting for a school founded as a teachers college."
+  },
+  {
+    "id": 19,
+    "category": "campus",
+    "label": "Campus",
+    "question": "Which famous event was hosted at Grady Gammage Auditorium in 2004?",
+    "options": ["Super Bowl halftime show", "The final presidential debate between Kerry and Bush", "A Grammy Award ceremony", "NASA's Mars rover launch broadcast"],
+    "answer_index": 1,
+    "answer": "The final presidential debate between Kerry and Bush",
+    "fact": "The third and final 2004 presidential debate between John Kerry and George W. Bush was held at Grady Gammage Auditorium."
+  },
+  {
+    "id": 20,
+    "category": "history",
+    "label": "History",
+    "question": "When did the first ASU athletic rivalry game (later called the Territorial Cup) against UA take place?",
+    "options": ["1896", "1899", "1905", "1911"],
+    "answer_index": 1,
+    "answer": "1899",
+    "fact": "The Territorial Cup rivalry began on Thanksgiving Day 1899. The Territorial Normal School defeated UA 11-2 in their first meeting."
+  },
+  {
+    "id": 21,
+    "category": "sports",
+    "label": "Sports",
+    "question": "Which former ASU swimmer won 4 gold medals (and 1 bronze) at the 2024 Paris Olympics?",
+    "options": ["Ilya Kharun", "Max McCusker", "Léon Marchand", "Hubert Kós"],
+    "answer_index": 2,
+    "answer": "Léon Marchand",
+    "fact": "Léon Marchand (France) had a historic Paris run — 4 golds and 1 bronze, setting 4 Olympic records. He became the third male swimmer in history to win four individual medals at a single Olympics."
+  },
+  {
+    "id": 22,
+    "category": "sports",
+    "label": "Sports",
+    "question": "How many total medals did ASU-connected athletes win at the 2024 Paris Olympics?",
+    "options": ["4", "6", "9", "12"],
+    "answer_index": 2,
+    "answer": "9",
+    "fact": "ASU athletes brought home 9 Olympic medals in Paris 2024. Léon Marchand led with 5, plus 2 bronzes from Ilya Kharun and 2 from the Rogge sisters in water polo."
+  },
+  {
+    "id": 23,
+    "category": "sports",
+    "label": "Sports",
+    "question": "At the 2024 Paris Olympics, which country did Léon Marchand represent?",
+    "options": ["Canada", "USA", "Australia", "France"],
+    "answer_index": 3,
+    "answer": "France",
+    "fact": "Marchand swam for France, competing in the 400m IM, 200m butterfly, 200m breaststroke, 200m IM, and the 4x100m medley relay."
+  },
+  {
+    "id": 24,
+    "category": "sports",
+    "label": "Sports",
+    "question": "How many ASU-connected athletes competed at the 2024 Paris Olympics?",
+    "options": ["10", "17", "24", "31"],
+    "answer_index": 2,
+    "answer": "24",
+    "fact": "24 current and former Sun Devil athletes competed in Paris, representing 15 different countries across 7 different sports — the most of any Big 12 school."
+  },
+  {
+    "id": 25,
+    "category": "sports",
+    "label": "Sports",
+    "question": "Léon Marchand was a 10-time NCAA champion while at ASU. How many years did he swim for the Sun Devils?",
+    "options": ["1 year", "2 years", "3 years", "4 years"],
+    "answer_index": 2,
+    "answer": "3 years",
+    "fact": "Marchand spent three seasons at ASU (2022–2024), winning 10 NCAA titles, 17 Pac-12 championships, and earning 21 CSCAA All-American honors before turning pro."
+  },
+  {
+    "id": 26,
+    "category": "sports",
+    "label": "Sports",
+    "question": "Which pair of ASU alumni sisters won bronze medals in water polo at the 2024 Paris Olympics?",
+    "options": ["Kharun sisters", "Rogge sisters", "Munoz sisters", "Grant sisters"],
+    "answer_index": 1,
+    "answer": "Rogge sisters",
+    "fact": "Bente and Lieke Rogge competed for the Netherlands women's water polo team. Bente scored a game-tying goal against Team USA in the bronze medal game."
+  },
+  {
+    "id": 27,
+    "category": "sports",
+    "label": "Sports",
+    "question": "Which famous golfer, an ASU alumnus, won 11 collegiate tournament wins at ASU and competed at the 2024 Paris Olympics for Spain?",
+    "options": ["Phil Mickelson", "Jon Rahm", "Tiger Woods", "Scottie Scheffler"],
+    "answer_index": 1,
+    "answer": "Jon Rahm",
+    "fact": "Jon Rahm won 11 collegiate tournaments at ASU — the second most in program history — and competed for Spain in Paris, tying for fifth in individual stroke play."
+  },
+  {
+    "id": 28,
+    "category": "sports",
+    "label": "Sports",
+    "question": "Phil Mickelson, another famous ASU golf alumnus, has won how many major championships?",
+    "options": ["3", "4", "6", "8"],
+    "answer_index": 2,
+    "answer": "6",
+    "fact": "Phil Mickelson has won 6 major championships in his career, including 3 Masters titles, 1 PGA Championship, and 1 Open Championship."
+  },
+  {
+    "id": 29,
+    "category": "sports",
+    "label": "Sports",
+    "question": "Which legendary baseball slugger and all-time home run record holder attended ASU?",
+    "options": ["Reggie Jackson", "Dustin Pedroia", "Barry Bonds", "Babe Ruth"],
+    "answer_index": 2,
+    "answer": "Barry Bonds",
+    "fact": "Barry Bonds attended ASU before going on to a legendary MLB career. ASU is second among all NCAA universities with 117 alumni who've played in MLB."
+  },
+  {
+    "id": 30,
+    "category": "sports",
+    "label": "Sports",
+    "question": "Which NFL player and war hero who attended ASU left his professional career to enlist after 9/11?",
+    "options": ["Curley Culp", "Randall McDaniel", "Pat Tillman", "Danny White"],
+    "answer_index": 2,
+    "answer": "Pat Tillman",
+    "fact": "Pat Tillman played football at ASU from 1994 to 1997, then left the NFL to enlist in the U.S. Army after 9/11. He was awarded the Silver Star posthumously."
+  },
+  {
+    "id": 31,
+    "category": "sports",
+    "label": "Sports",
+    "question": "James Harden, the NBA star, played college basketball at which school?",
+    "options": ["UCLA", "Arizona", "Oklahoma", "Arizona State"],
+    "answer_index": 3,
+    "answer": "Arizona State",
+    "fact": "James Harden played one season at ASU before being selected 3rd overall in the 2009 NBA Draft by the Oklahoma City Thunder."
+  },
+  {
+    "id": 32,
+    "category": "sports",
+    "label": "Sports",
+    "question": "ASU's Sun Devils compete in which NCAA conference as of the 2024-25 season?",
+    "options": ["Pac-12", "SEC", "Big 12", "ACC"],
+    "answer_index": 2,
+    "answer": "Big 12",
+    "fact": "ASU moved to the Big 12 Conference for the 2024-25 season after the Pac-12 dissolved."
+  },
+  {
+    "id": 33,
+    "category": "sports",
+    "label": "Sports",
+    "question": "Since 1952, how many total Olympic medals have ASU-connected athletes won across all Olympics?",
+    "options": ["28", "45", "66", "102"],
+    "answer_index": 2,
+    "answer": "66",
+    "fact": "Since the 1952 Helsinki Games, Sun Devil athletes have won 66 Olympic medals total: 29 golds, 12 silvers, and 28 bronzes."
+  },
+  {
+    "id": 34,
+    "category": "sports",
+    "label": "Sports",
+    "question": "ASU's baseball program has sent how many players to MLB — second only to one other NCAA school?",
+    "options": ["75", "95", "117", "140"],
+    "answer_index": 2,
+    "answer": "117",
+    "fact": "As of 2024, 117 ASU alumni have played in MLB, making it second among all NCAA universities. ASU also has the most inductees in the College Baseball Hall of Fame."
+  },
+  {
+    "id": 35,
+    "category": "sports",
+    "label": "Sports",
+    "question": "In what sport has ASU's women's program won a record 8 NCAA team titles — the most in its sport?",
+    "options": ["Swimming", "Track & Field", "Golf", "Softball"],
+    "answer_index": 2,
+    "answer": "Golf",
+    "fact": "ASU women's golf has won 8 NCAA titles, the most in the sport. ASU overall has won 25 NCAA team titles since 1965."
+  },
+  {
+    "id": 36,
+    "category": "sports",
+    "label": "Sports",
+    "question": "Which MLB Hall of Famer and Yankees legend played baseball at ASU?",
+    "options": ["Derek Jeter", "Reggie Jackson", "Bob Horner", "Rick Monday"],
+    "answer_index": 1,
+    "answer": "Reggie Jackson",
+    "fact": "'Mr. October' Reggie Jackson played at ASU before his legendary MLB career with the Oakland A's and New York Yankees, where he earned his Hall of Fame status."
+  },
+  {
+    "id": 37,
+    "category": "sports",
+    "label": "Sports",
+    "question": "Which ASU men's sports team won an NCAA championship as recently as 2024?",
+    "options": ["Football", "Baseball", "Men's swimming", "Wrestling"],
+    "answer_index": 2,
+    "answer": "Men's swimming",
+    "fact": "ASU men's swimming won the NCAA title in 2024, the most recent of ASU's 25 NCAA team championships."
+  },
+  {
+    "id": 38,
+    "category": "celebs",
+    "label": "Famous Alumni",
+    "question": "Which late-night TV host and comedian attended ASU?",
+    "options": ["Jay Leno", "Conan O'Brien", "Jimmy Kimmel", "Stephen Colbert"],
+    "answer_index": 2,
+    "answer": "Jimmy Kimmel",
+    "fact": "Jimmy Kimmel attended ASU. He's joined by fellow comedian alumni David Spade and Steve Allen, making ASU something of a comedy powerhouse."
+  },
+  {
+    "id": 39,
+    "category": "celebs",
+    "label": "Famous Alumni",
+    "question": "Which fashion designer, known for her iconic handbag brand, graduated from ASU with a journalism degree in 1985?",
+    "options": ["Donatella Versace", "Kate Spade", "Vera Wang", "Tory Burch"],
+    "answer_index": 1,
+    "answer": "Kate Spade",
+    "fact": "Kate Spade graduated from ASU in 1985. She met her future husband Andy Spade while at the university before going on to found her iconic fashion brand."
+  },
+  {
+    "id": 40,
+    "category": "celebs",
+    "label": "Famous Alumni",
+    "question": "ASU has produced Nobel laureates and how many Pulitzer Prize winners among its faculty?",
+    "options": ["2", "4", "6", "10"],
+    "answer_index": 2,
+    "answer": "6",
+    "fact": "ASU faculty includes 6 Pulitzer Prize winners, as well as Nobel laureates, 114 Fulbright Scholars, and 27 National Academy members."
+  },
+  {
+    "id": 41,
+    "category": "engineering",
+    "label": "Engineering",
+    "question": "What is the official name of ASU's engineering school, named after a major donor?",
+    "options": ["Jerry Yang College of Engineering", "Ira A. Fulton Schools of Engineering", "Del Webb School of Engineering", "Michael Crow College of Engineering"],
+    "answer_index": 1,
+    "answer": "Ira A. Fulton Schools of Engineering",
+    "fact": "In 2003, Ira A. Fulton — founder of Fulton Homes — donated $50 million to ASU's engineering college, which was renamed in his honor."
+  },
+  {
+    "id": 42,
+    "category": "engineering",
+    "label": "Engineering",
+    "question": "How many undergraduate degree programs does the Fulton Schools of Engineering offer?",
+    "options": ["12", "19", "27", "35"],
+    "answer_index": 2,
+    "answer": "27",
+    "fact": "The Fulton Schools offers 27 undergraduate degree programs and more than 50 graduate programs across 8 engineering schools."
+  },
+  {
+    "id": 43,
+    "category": "engineering",
+    "label": "Engineering",
+    "question": "The Ira A. Fulton Schools of Engineering claims what national distinction?",
+    "options": ["Oldest engineering school in the US", "Largest and most comprehensive engineering school in the US", "First to offer online engineering degrees", "Most NSF-funded engineering school"],
+    "answer_index": 1,
+    "answer": "Largest and most comprehensive engineering school in the US",
+    "fact": "The Fulton Schools is the largest and most comprehensive engineering school in the United States, with over 32,000 enrolled students."
+  },
+  {
+    "id": 44,
+    "category": "engineering",
+    "label": "Engineering",
+    "question": "In what year was the first bachelor's degree program in engineering approved at ASU?",
+    "options": ["1945", "1951", "1956", "1962"],
+    "answer_index": 2,
+    "answer": "1956",
+    "fact": "The first bachelor's degree program in engineering was approved in 1956. The School of Engineering was formally created in 1958."
+  },
+  {
+    "id": 45,
+    "category": "engineering",
+    "label": "Engineering",
+    "question": "How much was Ira A. Fulton's founding endowment to ASU's engineering school in 2003?",
+    "options": ["$10 million", "$25 million", "$50 million", "$100 million"],
+    "answer_index": 2,
+    "answer": "$50 million",
+    "fact": "Ira Fulton established the endowment with $50 million in 2003, transforming and expanding the college into one of the nation's leading engineering institutions."
+  },
+  {
+    "id": 46,
+    "category": "engineering",
+    "label": "Engineering",
+    "question": "In 2023, ASU's Fulton Schools became the first university in the nation to offer degrees at all three levels in which engineering specialty?",
+    "options": ["Semiconductor engineering", "Manufacturing engineering", "Biomedical engineering", "Space systems engineering"],
+    "answer_index": 1,
+    "answer": "Manufacturing engineering",
+    "fact": "In 2023, the Fulton Schools became the first university in the US to offer a bachelor's, master's, and doctoral degree in manufacturing engineering."
+  },
+  {
+    "id": 47,
+    "category": "engineering",
+    "label": "Engineering",
+    "question": "How many schools make up the Ira A. Fulton Schools of Engineering?",
+    "options": ["5", "6", "7", "8"],
+    "answer_index": 3,
+    "answer": "8",
+    "fact": "The Fulton Schools comprises 8 engineering schools spread across ASU's Tempe, Polytechnic, and West Valley campuses."
+  },
+  {
+    "id": 48,
+    "category": "engineering",
+    "label": "Engineering",
+    "question": "The Fulton Schools generated what percentage of all ASU patents in 2025?",
+    "options": ["41%", "58%", "71%", "85%"],
+    "answer_index": 2,
+    "answer": "71%",
+    "fact": "In 2025, the Fulton Schools generated 71% of all ASU patents, totaling 132 patents — reflecting its dominant role in ASU's research enterprise."
+  },
+  {
+    "id": 49,
+    "category": "engineering",
+    "label": "Engineering",
+    "question": "What is the name of ASU Engineering's residential learning community specifically built for engineering students?",
+    "options": ["Century Hall", "Manzanita Hall", "Tooker House", "Fulton Hall"],
+    "answer_index": 2,
+    "answer": "Tooker House",
+    "fact": "Tooker House is a 7-story, 1,600-person co-ed living and learning community designed specifically for Fulton Schools students, featuring 3D printers, laser cutters, and on-site digital classrooms."
+  },
+  {
+    "id": 50,
+    "category": "engineering",
+    "label": "Engineering",
+    "question": "What is ASU's world-class semiconductor research facility within the Fulton Schools called?",
+    "options": ["NanoTech Works", "MacroTechnology Works", "SiliconLab", "ChipCenter"],
+    "answer_index": 1,
+    "answer": "MacroTechnology Works",
+    "fact": "MacroTechnology Works (MTW) is ASU's facility for research on semiconductors, advanced materials, processing and device fabrication at industrial scale."
+  },
+  {
+    "id": 51,
+    "category": "engineering",
+    "label": "Engineering",
+    "question": "ASU's Fulton Schools has how much in annual research expenditures (FY2023)?",
+    "options": ["$89 million", "$150 million", "$265 million", "$400 million"],
+    "answer_index": 2,
+    "answer": "$265 million",
+    "fact": "The Fulton Schools has $265 million in annual research expenditures as of FY2023, up from $89 million in 2015, reflecting massive growth in research activity."
+  },
+  {
+    "id": 52,
+    "category": "campus",
+    "label": "Campus",
+    "question": "As of fall 2025, approximately how many total students are enrolled at ASU across all campuses and online?",
+    "options": ["75,000", "110,000", "160,000", "200,000"],
+    "answer_index": 2,
+    "answer": "160,000",
+    "fact": "ASU had 160,051 students enrolled as of fall 2025, including 81,541 online students — making it one of the largest universities in the US."
+  },
+  {
+    "id": 53,
+    "category": "history",
+    "label": "History",
+    "question": "ASU's mascot Sparky the Sun Devil was originally drawn by someone connected to which company?",
+    "options": ["Pixar", "Universal Studios", "Walt Disney", "Hanna-Barbera"],
+    "answer_index": 2,
+    "answer": "Walt Disney",
+    "fact": "Sparky was first created by Bert Anthony, a former Disney employee. The concept of Sparky was introduced in 1951 and became the official mascot."
+  },
+  {
+    "id": 54,
+    "category": "history",
+    "label": "History",
+    "question": "Before becoming the Sun Devils, which mascot did ASU use from 1922 to 1947?",
+    "options": ["Owls", "Normals", "Bulldogs", "Tigers"],
+    "answer_index": 2,
+    "answer": "Bulldogs",
+    "fact": "ASU's mascot was the Bulldogs from 1922 to 1947. Before that they were the Owls (1899-1922) and even earlier, the Normals."
+  },
+  {
+    "id": 55,
+    "category": "history",
+    "label": "History",
+    "question": "ASU received 'Research 1' status — recognizing it as a top research university — in what year?",
+    "options": ["1985", "1990", "1994", "2001"],
+    "answer_index": 2,
+    "answer": "1994",
+    "fact": "ASU achieved R1 status in 1994, a remarkable feat for a university without a medical school or large agriculture programs at the time."
+  },
+  {
+    "id": 56,
+    "category": "campus",
+    "label": "Campus",
+    "question": "What is ASU's ranking distinction that it has earned from U.S. News & World Report year after year?",
+    "options": ["Most affordable university", "Most diverse student body", "Most innovative university", "Best engineering school"],
+    "answer_index": 2,
+    "answer": "Most innovative university",
+    "fact": "U.S. News & World Report has consistently ranked ASU as the most innovative university in the United States."
+  },
+  {
+    "id": 57,
+    "category": "campus",
+    "label": "Campus",
+    "question": "ASU's Rare Books and Manuscripts Collection contains more than how many rare items?",
+    "options": ["5,000", "18,000", "34,000", "75,000"],
+    "answer_index": 2,
+    "answer": "34,000",
+    "fact": "The ASU Library's Rare Books and Manuscripts Collection contains more than 34,000 rare items spanning over 40 centuries, including books small enough to fit in the palm of your hand."
+  },
+  {
+    "id": 58,
+    "category": "campus",
+    "label": "Campus",
+    "question": "How many campuses does ASU have in the Phoenix metro area?",
+    "options": ["2", "3", "4", "5"],
+    "answer_index": 2,
+    "answer": "4",
+    "fact": "ASU has four campuses: the main Tempe campus, West (Phoenix), Polytechnic (Mesa), and Downtown Phoenix — plus regional learning centers across Arizona."
+  },
+  {
+    "id": 59,
+    "category": "sports",
+    "label": "Sports",
+    "question": "ASU's Ilya Kharun, who won 2 bronze medals at the 2024 Paris Olympics, competed for which country?",
+    "options": ["USA", "Australia", "Canada", "France"],
+    "answer_index": 2,
+    "answer": "Canada",
+    "fact": "Ilya Kharun, a current ASU swimmer at the time, competed for Canada. He won bronze in both the 100m and 200m butterfly events."
+  },
+  {
+    "id": 60,
+    "category": "sports",
+    "label": "Sports",
+    "question": "ASU has how many Pro Football Hall of Fame inductees among its alumni?",
+    "options": ["3", "6", "9", "12"],
+    "answer_index": 1,
+    "answer": "6",
+    "fact": "Six ASU alumni are in the Pro Football Hall of Fame, including Curley Culp and Randall McDaniel. Football Hall inductees also include Danny White and others."
+  }
+]

@@ -13,6 +13,7 @@ from database import engine
 # from games.wordle.router import router as wordle_router
 # from games.tutor_trivia.router import router as tutor_trivia_router
 from games.logic_sprint.router import router as logic_sprint_router
+from games.asu_trivia.router import router as asu_trivia_router
 
 
 # models.Base.metadata.create_all(bind=engine) # Moved to startup_event
@@ -134,6 +135,20 @@ def ensure_game_config_logic_sprint_day_column() -> None:
     except Exception as e:
         print(f"Warning: could not ensure `game_config.logic_sprint_day` column: {e}")
 
+def ensure_game_config_asu_trivia_day_column() -> None:
+    try:
+        inspector = inspect(engine)
+        if "game_config" not in inspector.get_table_names():
+            return
+        columns = {c["name"] for c in inspector.get_columns("game_config")}
+        if "asu_trivia_day" in columns:
+            return
+        with engine.begin() as conn:
+            conn.execute(text("ALTER TABLE game_config ADD COLUMN asu_trivia_day INTEGER DEFAULT 1"))
+        print("Added missing `game_config.asu_trivia_day` column.")
+    except Exception as e:
+        print(f"Warning: could not ensure `game_config.asu_trivia_day` column: {e}")
+
 def ensure_game_history_is_ranked_column() -> None:
     try:
         inspector = inspect(engine)
@@ -185,6 +200,7 @@ async def startup_event():
         ensure_game_config_tutor_trivia_day_column()
         ensure_game_config_wordle_day_column()
         ensure_game_config_logic_sprint_day_column()
+        ensure_game_config_asu_trivia_day_column()
         ensure_game_history_is_ranked_column()
         ensure_logic_sprint_state_columns()
         
@@ -227,6 +243,7 @@ async def read_root():
 # app.include_router(wordle_router)
 # app.include_router(tutor_trivia_router)
 app.include_router(logic_sprint_router)
+app.include_router(asu_trivia_router)
 
 
 # @app.get("/state")
@@ -266,7 +283,7 @@ class WordleScheduleRequest(BaseModel):
 
 
 @app.get("/leaderboard")
-async def get_leaderboard(game_type: Optional[str] = 'logic_sprint', db: Session = Depends(database.get_db)):
+async def get_leaderboard(game_type: Optional[str] = 'asu_trivia', db: Session = Depends(database.get_db)):
     # Sum scores from history per user, optionally filtered by game_type
     from sqlalchemy import func
 
@@ -406,6 +423,23 @@ async def update_logic_sprint_config(data: dict, db: Session = Depends(database.
     db.commit()
     return {"status": "updated", "logic_sprint_day": day}
 
+@app.post("/admin/game/asu-trivia")
+async def update_asu_trivia_config(data: dict, db: Session = Depends(database.get_db), admin: models.User = Depends(auth.admin_required)):
+    day = data.get("day")
+    if day is None:
+        raise HTTPException(status_code=400, detail="Day is required")
+    
+    config = db.query(models.GameConfig).first()
+    if not config:
+        config = models.GameConfig(asu_trivia_day=day, is_active=True)
+        db.add(config)
+    else:
+        config.asu_trivia_day = day
+    
+    db.commit()
+    return {"status": "updated", "asu_trivia_day": day}
+
+
 # @app.get("/admin/wordle/schedule")
 # async def get_wordle_schedule(db: Session = Depends(database.get_db)), admin: models.User = Depends(auth.admin_required)):
 #     return db.query(models.WordleWord).order_by(models.WordleWord.day).all()
@@ -463,6 +497,7 @@ async def delete_game(db: Session = Depends(database.get_db), admin: models.User
     db.query(models.GameState).delete()
     db.query(models.LogicSprintState).delete()
     db.query(models.TutorTriviaState).delete()
+    db.query(models.ASUTriviaState).delete()
     db.commit()
     return {"status": "wiped", "message": "All game data and sessions have been cleared."}
 
@@ -472,6 +507,7 @@ async def reset_leaderboard(db: Session = Depends(database.get_db), admin: model
     db.query(models.GameHistory).delete()
     db.query(models.LogicSprintState).delete()
     db.query(models.TutorTriviaState).delete()
+    db.query(models.ASUTriviaState).delete()
     db.query(models.GameState).delete()
     db.commit()
     return {"status": "reset", "message": "Leaderboard history and all game states have been cleared."}

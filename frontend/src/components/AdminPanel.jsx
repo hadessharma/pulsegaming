@@ -157,6 +157,16 @@ const AdminPanel = () => {
       showStatus('Failed to update Logic Sprint day.', 'error');
     }
   };
+
+  const handleSetASUTriviaDay = async (day) => {
+    try {
+      await api.updateASUTriviaDay(day);
+      showStatus(`ASU Trivia set to Day ${day}`);
+      fetchConfig();
+    } catch (err) {
+      showStatus('Failed to update ASU Trivia day.', 'error');
+    }
+  };
   
   if (loading) return <div className="p-8 text-center text-zinc-500 font-medium animate-pulse">Accessing Secure Vault...</div>;
   
@@ -259,7 +269,7 @@ const AdminPanel = () => {
           {activeTab === 'games' && (
             <div className="space-y-8">
               {/* Logic Sprint Day Control */}
-              <section className="glass-panel">
+              {/* <section className="glass-panel">
                 <div className="flex items-center gap-2 mb-6">
                   <PlayCircle className="w-5 h-5 text-accent" />
                   <h3 className="font-bold text-lg uppercase tracking-tight text-white">Logic Sprint Configuration</h3>
@@ -287,6 +297,40 @@ const AdminPanel = () => {
                   <div className="p-4 bg-zinc-900/50 rounded-xl border border-white/5">
                     <p className="text-sm text-zinc-400">
                       <span className="text-accent font-bold">INFO:</span> Advancing the day will limit tutors to one 60-second session for that specific day. Tutors will receive a random set of questions they haven't played yet.
+                    </p>
+                  </div>
+                </div>
+              </section> */}
+
+              {/* ASU Trivia Day Control */}
+              <section className="glass-panel">
+                <div className="flex items-center gap-2 mb-6">
+                  <PlayCircle className="w-5 h-5 text-accent" />
+                  <h3 className="font-bold text-lg uppercase tracking-tight text-white">ASU Trivia Configuration</h3>
+                </div>
+                <div className="space-y-6">
+                  <div>
+                    <label className="text-xs font-black text-zinc-500 uppercase tracking-widest block mb-4">Active ASU Trivia Day (1-5)</label>
+                    <div className="flex gap-2">
+                      {[1, 2, 3, 4, 5].map((day) => (
+                        <button
+                          key={day}
+                          onClick={() => handleSetASUTriviaDay(day)}
+                          className={`flex-1 py-4 rounded-xl font-black transition-all border ${
+                            config?.asu_trivia_day === day
+                              ? 'bg-accent text-white border-accent'
+                              : 'bg-zinc-950/50 text-zinc-500 border-white/5 hover:border-white/10 hover:text-zinc-300'
+                          }`}
+                        >
+                          DAY {day}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <div className="p-4 bg-zinc-900/50 rounded-xl border border-white/5">
+                    <p className="text-sm text-zinc-400">
+                      <span className="text-accent font-bold">INFO:</span> Advancing the day allows players to do 5 random ASU Trivia questions per day.
                     </p>
                   </div>
                 </div>
